@@ -13,10 +13,10 @@ int main (int argc, char* argv[ ]) {
 	 << " " << std::endl;
     return EXIT_FAILURE;
   }//if
-  u_int8_t widthh = atoi(argv[1]);
-  u_int8_t heighth = atoi(argv[2]);
+  u_int8_t width = atoi(argv[1]);
+  u_int8_t height = atoi(argv[2]);
 
-  ThePuzzle numberlink(widthh, heighth);
+  ThePuzzle numberlink(width, height);
   
   return EXIT_SUCCESS;
 }//main
