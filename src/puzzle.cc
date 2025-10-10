@@ -47,7 +47,23 @@ ThePuzzle::ThePuzzle (u_int8_t w, u_int8_t h) : width(w), height(h) {
 
 // destructor
 ThePuzzle::~ThePuzzle ( ) {
-    // nothing to do here
+    // delete all cells
+    Cell* Vdeletor = in;
+    Cell* Hdeletor = Vdeletor->adjacent[RIGHT];
+    for (size_t i = 0; i < height; i++) {
+        size_t j = 0;
+        if (i != 0) {
+            Vdeletor = Vdeletor->adjacent[DOWN];
+            delete Vdeletor->adjacent[UP];
+            Hdeletor = Vdeletor->adjacent[RIGHT];
+        }
+        for (; j < width; j++) {
+            if (j == 0) continue; // skip the first cell
+            Hdeletor = Hdeletor->adjacent[RIGHT];
+            delete Hdeletor->adjacent[LEFT];
+        }//for j  
+    }//for i
+    delete Vdeletor;
 }//~ThePuzzle
 
 Cell::Cell(u_int8_t x_coord, u_int8_t y_coord) : x(x_coord), y(y_coord), number(0), isFixed(false) {
