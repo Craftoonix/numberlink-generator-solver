@@ -42,3 +42,6 @@
 
 # VS Code files
 .vscode/
+
+# numberlink generated files
+numberlink

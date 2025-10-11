@@ -8,15 +8,10 @@
 
 
 // constructor
-ThePuzzle::ThePuzzle (u_int8_t w, u_int8_t h) : width(w), height(h) {
-
+ThePuzzle::ThePuzzle (u_int16_t w, u_int16_t h) : width(w), height(h) 
+{
     width = w;
     height = h;
-
-    if ( width > MAX_CELLS || height > MAX_CELLS ) {
-        std::cerr << "Error: maximum width & height is " << MAX_CELLS << std::endl;
-            exit (EXIT_FAILURE);
-    }//if
 
     // create the grid of cells
     in = new Cell(0,0); // create the first cell;
@@ -46,19 +41,23 @@ ThePuzzle::ThePuzzle (u_int8_t w, u_int8_t h) : width(w), height(h) {
 }//ThePuzzle
 
 // destructor
-ThePuzzle::~ThePuzzle ( ) {
+ThePuzzle::~ThePuzzle()
+{
     // delete all cells
     Cell* Vdeletor = in;
     Cell* Hdeletor = Vdeletor->adjacent[RIGHT];
     for (size_t i = 0; i < height; i++) {
-        size_t j = 0;
         if (i != 0) {
             Vdeletor = Vdeletor->adjacent[DOWN];
             delete Vdeletor->adjacent[UP];
             Hdeletor = Vdeletor->adjacent[RIGHT];
         }
-        for (; j < width; j++) {
-            if (j == 0) continue; // skip the first cell
+        for (size_t j = 1; j < width; j++) {
+            if (j == 1) continue; // skip the first cell
+            if (j == width) { // last cell in the row
+                delete Hdeletor;
+                continue;
+            }
             Hdeletor = Hdeletor->adjacent[RIGHT];
             delete Hdeletor->adjacent[LEFT];
         }//for j  
@@ -66,10 +65,41 @@ ThePuzzle::~ThePuzzle ( ) {
     delete Vdeletor;
 }//~ThePuzzle
 
-Cell::Cell(u_int8_t x_coord, u_int8_t y_coord) : x(x_coord), y(y_coord), number(0), isFixed(false) {
+void ThePuzzle::printPuzzle()
+{
+    Cell* Hprinter = in;
+    Cell* Vprinter = in;
+    // Print the grid
+
+    for (size_t i = 0; i < height; i++)
+    {
+        std::cout << "+-";
+        for (size_t j = 1; j < width; j++) {
+            std::cout << "+-";
+        }
+        std::cout << "+" << std::endl;
+        for (size_t j = 0; j < width; j++) {
+            std::cout << "|" << Hprinter->getNumber();
+            Hprinter = Hprinter->adjacent[RIGHT];
+        }
+        std::cout << "|" << std::endl;
+        Vprinter = Vprinter->adjacent[DOWN];
+        Hprinter = Vprinter;
+    }
+    std::cout << "+-";
+    for (size_t j = 1; j < width; j++) {
+        std::cout << "+-";
+    }
+    std::cout << "+" << std::endl;
+}
+
+Cell::Cell(u_int16_t x_coord, u_int16_t y_coord) : x(x_coord), y(y_coord), 
+                                                number(0), isFixed(false) 
+{
     for (size_t i = 0; i < MAX_DIRECTIONS; i++) {
         adjacent[i] = nullptr;
     }
     x = x_coord;
     y = y_coord;
+    number = 0; // initially empty
 }//Cell
