@@ -39,6 +39,24 @@ int main (int argc, char* argv[ ]) {
         std::cerr << "Error: coordinates must be within the grid" << std::endl;
         return EXIT_FAILURE; 
         }
+        // pairs must be unique
+        for (const auto& p : numberPairs) {
+            if ((p.first.first == x1 && p.first.second == y1) ||
+                (p.second.first == x1 && p.second.second == y1) ||
+                (p.first.first == x2 && p.first.second == y2) ||
+                (p.second.first == x2 && p.second.second == y2)) {
+                std::cerr << "Error: pairs must be unique" << std::endl;
+                return EXIT_FAILURE;
+            }
+        }
+        // and cant be the same
+        if (x1 == x2 && y1 == y2) {
+            std::cerr << "Error: a pair cannot have the same coordinates" << std::
+            endl;
+            return EXIT_FAILURE;
+        }
+
+        // add the pair to the vector
         numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
                                             std::make_pair(x2,y2)));
     }
