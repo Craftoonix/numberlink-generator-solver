@@ -8,10 +8,14 @@
 
 
 // constructor
-ThePuzzle::ThePuzzle (u_int16_t w, u_int16_t h) : width(w), height(h) 
+ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h, 
+    std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                          std::pair<u_int16_t,u_int16_t>>> n) : 
+                          width(w), height(h), numberPairs(n) 
 {
     width = w;
     height = h;
+    numberPairs = n;
 
     // create the grid of cells
     in = new Cell(0,0); // create the first cell;
@@ -38,6 +42,32 @@ ThePuzzle::ThePuzzle (u_int16_t w, u_int16_t h) : width(w), height(h)
             HVconnector->adjacent[DOWN] = Hconnector;
         }//for j  
     }//for i
+
+    // assign the numbers to the cells
+    size_t counter = 0;
+    for (const auto& p : numberPairs) {
+        counter++;
+        u_int16_t x1 = p.first.first;
+        u_int16_t y1 = p.first.second;
+        u_int16_t x2 = p.second.first;
+        u_int16_t y2 = p.second.second;
+        Cell* assigner1 = in;
+        Cell* assigner2 = in;
+        for (size_t i = 0; i < y1; i++) {
+            assigner1 = assigner1->adjacent[DOWN];
+        }
+        for (size_t j = 0; j < x1; j++) {
+            assigner1 = assigner1->adjacent[RIGHT];
+        }
+        for (size_t i = 0; i < y2; i++) {
+            assigner2 = assigner2->adjacent[DOWN];
+        }
+        for (size_t j = 0; j < x2; j++) {
+            assigner2 = assigner2->adjacent[RIGHT];
+        }
+        assigner1->number = counter;
+        assigner2->number = counter;
+    }
 }//ThePuzzle
 
 // destructor
@@ -79,7 +109,7 @@ void ThePuzzle::printPuzzle()
         }
         std::cout << "+" << std::endl;
         for (size_t j = 0; j < width; j++) {
-            std::cout << "|" << Hprinter->getNumber();
+            std::cout << "|" << Hprinter->number;
             Hprinter = Hprinter->adjacent[RIGHT];
         }
         std::cout << "|" << std::endl;
@@ -93,8 +123,7 @@ void ThePuzzle::printPuzzle()
     std::cout << "+" << std::endl;
 }
 
-Cell::Cell(u_int16_t x_coord, u_int16_t y_coord) : x(x_coord), y(y_coord), 
-                                                number(0), isFixed(false) 
+Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)                                          
 {
     for (size_t i = 0; i < MAX_DIRECTIONS; i++) {
         adjacent[i] = nullptr;

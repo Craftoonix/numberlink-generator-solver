@@ -2,6 +2,8 @@
 #define PUZZLE_H
 
 #include "constants.h"
+#include <vector>
+#include <utility>
 
 /**
  * @brief Cardinal Directions of a cell
@@ -21,21 +23,18 @@ class Cell
         ~Cell() = default;
         Cell* adjacent[MAX_DIRECTIONS];      // up, right, down, left (The adjacent cells)
         
-        /**
-         * @brief Get the Number object
-         * 
-         * @return u_int16_t 
-         */
-        u_int16_t getNumber() const { return number; }
+        u_int16_t number; // the number in the cell (0 if empty)
 
     private:
-        u_int16_t x, y, number;  // coordinates and number
+        u_int16_t x, y;  // coordinates
         bool isFixed;           // is the cell fixed (given as input)?
 };       
 
 class ThePuzzle {
     public:
-        ThePuzzle(u_int16_t w, u_int16_t h);
+        ThePuzzle(u_int16_t w, u_int16_t h, 
+            std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                                  std::pair<u_int16_t,u_int16_t>>> n);
         ~ThePuzzle ();
         
         /**
@@ -48,6 +47,9 @@ class ThePuzzle {
         Cell* in;      // pointer to the first cell of the puzzle
         u_int16_t width;   // and width
         u_int16_t height;  // actual height
+        std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                              std::pair<u_int16_t,u_int16_t>
+        >> numberPairs; // vector of pairs of coordinates of numbers
 };//ThePuzzle
 
 
