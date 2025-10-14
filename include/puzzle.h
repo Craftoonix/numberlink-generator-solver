@@ -24,6 +24,7 @@ class Cell
         Cell* adjacent[MAX_DIRECTIONS];      // up, right, down, left (The adjacent cells)
         
         u_int16_t number; // the number in the cell (0 if empty)
+        void setFixed();
 
     private:
         u_int16_t x, y;  // coordinates

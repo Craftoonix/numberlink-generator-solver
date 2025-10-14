@@ -67,6 +67,10 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         }
         assigner1->number = counter;
         assigner2->number = counter;
+
+        // mark the cells as fixed
+        assigner1->setFixed();
+        assigner2->setFixed();
     }
 }//ThePuzzle
 
@@ -132,3 +136,8 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
     y = y_coord;
     number = 0; // initially empty
 }//Cell
+
+void Cell::setFixed()
+{
+    isFixed = true;
+}
