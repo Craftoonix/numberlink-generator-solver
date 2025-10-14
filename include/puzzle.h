@@ -25,6 +25,16 @@ class Cell
         
         u_int16_t number; // the number in the cell (0 if empty)
         void setFixed();
+        bool isFixedCell() const;
+        
+        /**
+         * @brief equality operator 
+         * 
+         * @param other the other cell to compare to
+         * @return true coordinates are the same
+         * @return false coordinates are different
+         */
+        bool operator==(const Cell& other) const;
 
     private:
         u_int16_t x, y;  // coordinates
@@ -32,37 +42,54 @@ class Cell
 };       
 
 class ThePuzzle {
-    public:
+    private:
+        u_int16_t width;   // and width
+        u_int16_t height;  // actual height
+
+        public:
         ThePuzzle(u_int16_t w, u_int16_t h, 
             std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
-                                  std::pair<u_int16_t,u_int16_t>>> n);
-        ~ThePuzzle ();
-        
+            std::pair<u_int16_t,u_int16_t>>> n);
+            ~ThePuzzle ();
+            
+        u_int16_t numPairs; // number of pairs of numbers
         /**
          * @brief Prints the puzzle to the console
          * 
          */
         void printPuzzle();
-    
-    private:
-        Cell* in;      // pointer to the first cell of the puzzle
-        u_int16_t width;   // and width
-        u_int16_t height;  // actual height
+        bool isSolved() const; // check if the puzzle is solved
+
+        /**
+         * @brief finds a cell given its coordinates starting from the cell "in"
+         * 
+         * @param x_coord the x coordinate
+         * @param y_coord the y coordinate
+         * @param in the starting cell
+         * @return Cell* the found cell or nullptr if not found
+         */
+        Cell* findCell(u_int16_t x_coord, u_int16_t y_coord);
+
         std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
-                              std::pair<u_int16_t,u_int16_t>
+        std::pair<u_int16_t,u_int16_t>
         >> numberPairs; // vector of pairs of coordinates of numbers
+        Cell* in;      // pointer to the first cell of the puzzle
+        
 };//ThePuzzle
 
 class solver
 {
     public:
-        virtual ThePuzzle solve(ThePuzzle& p) = 0;
+        virtual bool solve(Cell* curr, Cell* otherPair, 
+                            ThePuzzle &p, u_int16_t currPair) = 0;
+        virtual void solveWrapper(ThePuzzle& p) = 0;
 };
 
 class dfs : public solver
 {
     public:
-        ThePuzzle solve(ThePuzzle& p) override;
+        bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;
+        void solveWrapper(ThePuzzle& p) override;
 };
 
 

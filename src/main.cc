@@ -62,6 +62,8 @@ int main (int argc, char* argv[ ]) {
     }
     
     ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
+    dfs solver;
+    solver.solveWrapper(numberlink);
     numberlink.printPuzzle();
     
     return EXIT_SUCCESS;

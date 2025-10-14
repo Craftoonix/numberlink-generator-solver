@@ -51,20 +51,9 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         u_int16_t y1 = p.first.second;
         u_int16_t x2 = p.second.first;
         u_int16_t y2 = p.second.second;
-        Cell* assigner1 = in;
-        Cell* assigner2 = in;
-        for (size_t i = 0; i < y1; i++) {
-            assigner1 = assigner1->adjacent[DOWN];
-        }
-        for (size_t j = 0; j < x1; j++) {
-            assigner1 = assigner1->adjacent[RIGHT];
-        }
-        for (size_t i = 0; i < y2; i++) {
-            assigner2 = assigner2->adjacent[DOWN];
-        }
-        for (size_t j = 0; j < x2; j++) {
-            assigner2 = assigner2->adjacent[RIGHT];
-        }
+        Cell* assigner1 = findCell(x1, y1);
+        Cell* assigner2 = findCell(x2, y2);
+        
         assigner1->number = counter;
         assigner2->number = counter;
 
@@ -72,6 +61,7 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         assigner1->setFixed();
         assigner2->setFixed();
     }
+    numPairs = counter;
 }//ThePuzzle
 
 // destructor
@@ -127,6 +117,16 @@ void ThePuzzle::printPuzzle()
     std::cout << "+" << std::endl;
 }
 
+bool ThePuzzle::isSolved() const
+{
+    Cell* checker = in;
+    for (size_t i = 0; i < height; i++) 
+        for (size_t j = 0; j < width; j++)
+            if (checker->number == 0)
+                return false; // found an empty cell
+    return true; // no empty cells found
+}
+
 Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)                                          
 {
     for (size_t i = 0; i < MAX_DIRECTIONS; i++) {
@@ -137,14 +137,82 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
     number = 0; // initially empty
 }//Cell
 
+bool Cell::operator==(const Cell& other) const
+{
+    return (x == other.x && y == other.y);
+}
+
 void Cell::setFixed()
 {
     isFixed = true;
 }
 
-ThePuzzle dfs::solve(ThePuzzle& p)
+bool Cell::isFixedCell() const
 {
-    // Placeholder implementation
-    std::cout << "DFS solver not yet implemented." << std::endl;
-    return p;
+    return isFixed;
+}
+
+Cell* ThePuzzle::findCell(u_int16_t x_coord, u_int16_t y_coord)
+{
+    if (x_coord >= width || y_coord >= height) {
+        return nullptr; // return the first cell if out of bounds
+    }
+
+    Cell* finder = in;
+    for (size_t i = 0; i < y_coord; i++) {
+        finder = finder->adjacent[DOWN];
+    }
+    for (size_t j = 0; j < x_coord; j++) {
+        finder = finder->adjacent[RIGHT];
+    }
+    return finder; // return the found cell
+}
+
+bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
+{
+    for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++) {
+        if (curr->adjacent[dir] == nullptr) 
+            continue; // skip if no adjacent cell
+
+        if (curr->adjacent[dir] == otherPair) {
+            if (p.numPairs != currPair)
+                return true; // found my other half
+            else if (p.isSolved())
+                return true; // found my other half and puzzle is solved
+            else
+                continue; // skip if puzzle not solved yet
+        }
+
+        if (curr->adjacent[dir]->number != 0)
+            continue; // skip if not empty
+
+        // if the adjacent cell is empty, fill it with the current number
+        curr->adjacent[dir]->number = curr->number;
+        if (solve(curr->adjacent[dir], otherPair,p,currPair)) {
+            return true; // solution found
+        }
+    }
+    // backtrack
+    curr->number = 0;    
+    return false; // no solution found
+}
+
+void dfs::solveWrapper(ThePuzzle& p)
+{
+    u_int16_t currPair = 0;
+    for (const auto& pair : p.numberPairs) {
+        u_int16_t x1 = pair.first.first;
+        u_int16_t y1 = pair.first.second;
+        u_int16_t x2 = pair.second.first;
+        u_int16_t y2 = pair.second.second;
+        Cell* start = p.findCell(x1, y1);
+        Cell* end = p.findCell(x2, y2);
+        currPair++;
+
+        if (solve(start, end, p, currPair))
+            continue;
+        else
+            return; // return the original puzzle if no solution found
+    }
+    return; // return the solved puzzle
 }
