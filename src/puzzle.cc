@@ -141,3 +141,10 @@ void Cell::setFixed()
 {
     isFixed = true;
 }
+
+ThePuzzle dfs::solve(ThePuzzle& p)
+{
+    // Placeholder implementation
+    std::cout << "DFS solver not yet implemented." << std::endl;
+    return p;
+}

@@ -53,6 +53,19 @@ class ThePuzzle {
         >> numberPairs; // vector of pairs of coordinates of numbers
 };//ThePuzzle
 
+class solver
+{
+    public:
+        virtual ThePuzzle solve(ThePuzzle& p) = 0;
+};
+
+class dfs : public solver
+{
+    public:
+        ThePuzzle solve(ThePuzzle& p) override;
+};
+
+
 
 
 #endif // PUZZLE_H
