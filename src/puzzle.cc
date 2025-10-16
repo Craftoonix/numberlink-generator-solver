@@ -26,14 +26,14 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         size_t j = 0;
         if (i != 0) {
             HVconnector = Vconnector;
-            Vconnector->adjacent[DOWN] = new Cell(i,j);
+            Vconnector->adjacent[DOWN] = new Cell(j,i);
             Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
             Vconnector = Vconnector->adjacent[DOWN];
             Hconnector = Vconnector;
         }
         for (; j < width; j++) {
             if (j == 0) continue; // skip the first cell
-            Hconnector->adjacent[RIGHT] = new Cell(i,j);
+            Hconnector->adjacent[RIGHT] = new Cell(j,i);
             Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
             Hconnector = Hconnector->adjacent[RIGHT];
             if (i == 0) continue; // skip the first row
@@ -117,13 +117,14 @@ void ThePuzzle::printPuzzle()
     std::cout << "+" << std::endl;
 }
 
-bool ThePuzzle::isSolved() const
+bool ThePuzzle::isSolved()
 {
-    Cell* checker = in;
-    for (size_t i = 0; i < height; i++) 
-        for (size_t j = 0; j < width; j++)
+    for (u_int16_t i = 0; i < height; i++) 
+        for (u_int16_t j = 0; j < width; j++) {            
+            Cell* checker = findCell(j,i);
             if (checker->number == 0)
-                return false; // found an empty cell
+                return false; // found an empty cell}
+        }
     return true; // no empty cells found
 }
 
@@ -155,7 +156,7 @@ bool Cell::isFixedCell() const
 Cell* ThePuzzle::findCell(u_int16_t x_coord, u_int16_t y_coord)
 {
     if (x_coord >= width || y_coord >= height) {
-        return nullptr; // return the first cell if out of bounds
+        return nullptr; // return nullptr if out of bounds
     }
 
     Cell* finder = in;
@@ -165,7 +166,20 @@ Cell* ThePuzzle::findCell(u_int16_t x_coord, u_int16_t y_coord)
     for (size_t j = 0; j < x_coord; j++) {
         finder = finder->adjacent[RIGHT];
     }
+
     return finder; // return the found cell
+}
+
+void ThePuzzle::switchFinder(u_int16_t toNumber, Cell& start, Cell& end) {
+    toNumber--;
+    std::cout << toNumber + 1 << "\n";
+    
+    u_int16_t x1 = numberPairs.at(toNumber).first.first; 
+    u_int16_t y1 = numberPairs.at(toNumber).first.second; 
+    u_int16_t x2 = numberPairs.at(toNumber).second.first; 
+    u_int16_t y2 = numberPairs.at(toNumber).second.second; 
+    start = *findCell(x1, y1);
+    end = *findCell(x2, y2);
 }
 
 bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
@@ -174,13 +188,35 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
         if (curr->adjacent[dir] == nullptr) 
             continue; // skip if no adjacent cell
 
-        if (curr->adjacent[dir] == otherPair) {
-            if (p.numPairs != currPair)
-                return true; // found my other half
-            else if (p.isSolved())
-                return true; // found my other half and puzzle is solved
-            else
-                continue; // skip if puzzle not solved yet
+        if (*curr->adjacent[dir] == *otherPair) { // found my other half
+            curr->number = otherPair->number;
+            
+            if (p.isSolved())
+                return true; // puzzle is solved 
+            if(currPair == p.numPairs)
+                continue; // all pairs are done but puzzle not solved, check other directions
+            // switch to the next pair
+            //p.switchFinder(currPair + 1, *curr, *otherPair);
+
+            u_int16_t x1 = p.numberPairs.at(currPair).first.first; 
+            u_int16_t y1 = p.numberPairs.at(currPair).first.second; 
+            u_int16_t x2 = p.numberPairs.at(currPair).second.first; 
+            u_int16_t y2 = p.numberPairs.at(currPair).second.second; 
+            Cell* prev = curr;
+            curr = p.findCell(x1, y1);
+            otherPair = p.findCell(x2, y2);
+
+            if (solve(curr, otherPair, p, currPair + 1))
+                return true; // solution found
+
+            //p.switchFinder(currPair, *curr, *otherPair);
+            x2 = p.numberPairs.at(currPair - 1).second.first; 
+            y2 = p.numberPairs.at(currPair - 1).second.second; 
+            curr = prev;
+            otherPair = p.findCell(x2, y2);
+
+            continue; // check other directions
+            
         }
 
         if (curr->adjacent[dir]->number != 0)
@@ -193,26 +229,16 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
         }
     }
     // backtrack
-    curr->number = 0;    
+    if (!curr->isFixedCell())
+        curr->number = 0;    
     return false; // no solution found
 }
 
 void dfs::solveWrapper(ThePuzzle& p)
 {
-    u_int16_t currPair = 0;
-    for (const auto& pair : p.numberPairs) {
-        u_int16_t x1 = pair.first.first;
-        u_int16_t y1 = pair.first.second;
-        u_int16_t x2 = pair.second.first;
-        u_int16_t y2 = pair.second.second;
-        Cell* start = p.findCell(x1, y1);
-        Cell* end = p.findCell(x2, y2);
-        currPair++;
-
-        if (solve(start, end, p, currPair))
-            continue;
-        else
-            return; // return the original puzzle if no solution found
-    }
-    return; // return the solved puzzle
+    solve(p.findCell(p.numberPairs.at(0).first.first,
+                     p.numberPairs.at(0).first.second),
+          p.findCell(p.numberPairs.at(0).second.first,
+                     p.numberPairs.at(0).second.second),
+          p, 1);
 }

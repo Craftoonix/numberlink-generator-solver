@@ -22,7 +22,8 @@ class Cell
         Cell(u_int16_t x_coord, u_int16_t y_coord);
         ~Cell() = default;
         Cell* adjacent[MAX_DIRECTIONS];      // up, right, down, left (The adjacent cells)
-        
+        Cell* checked[MAX_DIRECTIONS];       // used for backtracking
+
         u_int16_t number; // the number in the cell (0 if empty)
         void setFixed();
         bool isFixedCell() const;
@@ -36,8 +37,13 @@ class Cell
          */
         bool operator==(const Cell& other) const;
 
-    private:
+        // for debugging
+        void printCoordinates() const {
+            std::cout << "(" << x << "," << y << ")(" << number << ") \n";
+        }
+
         u_int16_t x, y;  // coordinates
+    private:
         bool isFixed;           // is the cell fixed (given as input)?
 };       
 
@@ -46,7 +52,7 @@ class ThePuzzle {
         u_int16_t width;   // and width
         u_int16_t height;  // actual height
 
-        public:
+    public:
         ThePuzzle(u_int16_t w, u_int16_t h, 
             std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
             std::pair<u_int16_t,u_int16_t>>> n);
@@ -58,7 +64,10 @@ class ThePuzzle {
          * 
          */
         void printPuzzle();
-        bool isSolved() const; // check if the puzzle is solved
+        bool isSolved(); // check if the puzzle is solved
+
+        void switchFinder(u_int16_t toNumber, Cell& start, Cell& end);
+
 
         /**
          * @brief finds a cell given its coordinates starting from the cell "in"
