@@ -7,7 +7,10 @@
 # include "constants.h"
 
 // main program
-int main (int argc, char* argv[ ]) {
+int main (int argc, char* argv[]) {
+    
+
+
     // check command line arguments
     if ((argc - 3) % 4 != 0) {
         std::cout << "Usage: " << argv[0] 
