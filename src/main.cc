@@ -62,8 +62,16 @@ int main (int argc, char* argv[ ]) {
     }
     
     ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
+    std::cout << "Initial puzzle:\n";
+    numberlink.printPuzzle();
+    std::cout << std::endl;
     dfs solver;
     solver.solveWrapper(numberlink);
+    if (!numberlink.isSolved()) {
+        std::cout << "No solution found.\n";
+        return EXIT_FAILURE;
+    }
+    std::cout << "Solved puzzle:\n";
     numberlink.printPuzzle();
     
     return EXIT_SUCCESS;
