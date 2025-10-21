@@ -3,22 +3,41 @@
 # include <fstream>
 # include <cstdlib>
 # include <ctime>
+# include <unistd.h>
 # include "puzzle.h"
 # include "constants.h"
+# include "options.h"
 
 // main program
 int main (int argc, char* argv[]) {
-    
+    int opt;
+    // parse command line options
+    while ((opt = getopt(argc, argv, ":si")) != -1) {
+        switch (opt)
+        {
+        case 's':
+            // solve the puzzle
+            SOLVE_PUZZLE = true;
+            break;
+        case 'i':
+            // show the initial puzzle
+            SHOW_INITIAL_PUZZLE = true;
+            break;
+        
+        case '?':
+            std::cerr << "Unknown option: " << char(optopt) << std::endl;
+        }
+    }
 
-
-    // check command line arguments
-    if ((argc - 3) % 4 != 0) {
+    // after options, there should be width, height, and pairs
+    if ((argc - optind + 2) % 4 != 0) {
         std::cout << "Usage: " << argv[0] 
-        << "<width> <height> <coordinates of pairs>" << std::endl;
+        << "<options> <width> <height> <coordinates of pairs>" << std::endl;
         return EXIT_FAILURE;
-    }//if
-    int width = atoi(argv[1]);
-    int height = atoi(argv[2]);
+    }
+
+    int width = atoi(argv[optind]);
+    int height = atoi(argv[optind + 1]);
     if (width <= 0 || height <= 0) {
         std::cerr << "Error: width & height must be positive integers" << std::endl;
         return EXIT_FAILURE;
@@ -31,12 +50,12 @@ int main (int argc, char* argv[]) {
     //create vector of pairs of coordinates of numbers
     std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
                            std::pair<u_int16_t,u_int16_t>>> numberPairs;
-    for (int i = 0; i < argc - 3; i = i + 4)
+    for (int i = optind + 2; i < argc; i = i + 4)
     {
-        int x1 = atoi(argv[i + 3]);
-        int y1 = atoi(argv[i + 4]);
-        int x2 = atoi(argv[i + 5]);
-        int y2 = atoi(argv[i + 6]);
+        int x1 = atoi(argv[i + 0]);
+        int y1 = atoi(argv[i + 1]);
+        int x2 = atoi(argv[i + 2]);
+        int y2 = atoi(argv[i + 3]);
         if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
             x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
         std::cerr << "Error: coordinates must be within the grid" << std::endl;
@@ -65,9 +84,14 @@ int main (int argc, char* argv[]) {
     }
     
     ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
-    std::cout << "Initial puzzle:\n";
-    numberlink.printPuzzle();
-    std::cout << std::endl;
+    if (SHOW_INITIAL_PUZZLE) {
+        std::cout << "Initial puzzle:\n";
+        numberlink.printPuzzle();
+        std::cout << std::endl;
+    }
+    if (!SOLVE_PUZZLE) {
+        return EXIT_SUCCESS; // nothing more to do
+    }
     dfs solver;
     solver.solveWrapper(numberlink);
     if (!numberlink.isSolved()) {

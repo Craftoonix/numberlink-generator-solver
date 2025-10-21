@@ -1,6 +1,7 @@
 #ifndef options_h
 #define options_h
 
-static const bool ENABLE_PRINTING = true; // Enable or disable logging throughout the project
+static bool SHOW_INITIAL_PUZZLE = false;
+static bool SOLVE_PUZZLE = false;
 
 #endif /* options_h */
