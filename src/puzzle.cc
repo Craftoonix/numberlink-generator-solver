@@ -136,6 +136,9 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
     x = x_coord;
     y = y_coord;
     number = 0; // initially empty
+    inPath = nullptr;
+    outPath = nullptr;
+    isFixed = false;
 }//Cell
 
 bool Cell::operator==(const Cell& other) const
@@ -241,4 +244,13 @@ void dfs::solveWrapper(ThePuzzle& p)
           p.findCell(p.numberPairs.at(0).second.first,
                      p.numberPairs.at(0).second.second),
           p, 1);
+}
+
+void kruskal::solveWrapper(ThePuzzle& p)
+{
+    size_t numEdges = p.getNumEdges();
+    for (size_t i = 0; i < numEdges; i++) {
+        
+    }
+
 }

@@ -24,6 +24,10 @@ class Cell
         Cell* adjacent[MAX_DIRECTIONS];      // up, right, down, left (The adjacent cells)
         Cell* checked[MAX_DIRECTIONS];       // used for backtracking
 
+        // Kruskal's algorithm members
+        Cell* inPath;              // pointer to the cell where the path comes from
+        Cell* outPath;             // pointer to the cell where the path goes to
+
         u_int16_t number; // the number in the cell (0 if empty)
         void setFixed();
         bool isFixedCell() const;
@@ -68,6 +72,10 @@ class ThePuzzle {
 
         void switchFinder(u_int16_t toNumber, Cell& start, Cell& end);
 
+        size_t getNumEdges() const {
+            return ((width - 1) * height) + ((height - 1) * width);
+        }
+
 
         /**
          * @brief finds a cell given its coordinates starting from the cell "in"
@@ -83,6 +91,9 @@ class ThePuzzle {
         std::pair<u_int16_t,u_int16_t>
         >> numberPairs; // vector of pairs of coordinates of numbers
         Cell* in;      // pointer to the first cell of the puzzle
+
+        
+
         
 };//ThePuzzle
 
@@ -95,6 +106,13 @@ class solver
 };
 
 class dfs : public solver
+{
+    public:
+        bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;
+        void solveWrapper(ThePuzzle& p) override;
+};
+
+class kruskal : public solver
 {
     public:
         bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;

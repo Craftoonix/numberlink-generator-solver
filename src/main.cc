@@ -3,6 +3,7 @@
 # include <fstream>
 # include <cstdlib>
 # include <ctime>
+# include <cstring>
 # include <unistd.h>
 # include "puzzle.h"
 # include "constants.h"
@@ -12,12 +13,20 @@
 int main (int argc, char* argv[]) {
     int opt;
     // parse command line options
-    while ((opt = getopt(argc, argv, ":si")) != -1) {
+    while ((opt = getopt(argc, argv, ":s:i")) != -1) 
+    {
         switch (opt)
         {
         case 's':
             // solve the puzzle
             SOLVE_PUZZLE = true;
+            //std::string arg(optarg);
+            if (strcmp(optarg, "dfs") == 0) {
+                // only dfs is implemented currently
+            } else {
+                std::cerr << "Error: unknown solving method '" << optarg << "'\n";
+                return EXIT_FAILURE;
+            }
             break;
         case 'i':
             // show the initial puzzle
