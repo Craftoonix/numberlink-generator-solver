@@ -119,6 +119,12 @@ class kruskal : public solver
         void solveWrapper(ThePuzzle& p) override;
 };
 
+class sat : public solver
+{
+    public:
+        std::vector<std::string> generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
+};
+
 
 
 

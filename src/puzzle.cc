@@ -5,6 +5,7 @@
 #include <ctime>
 #include "puzzle.h"
 #include "constants.h"
+#include <sstream>
 
 
 // constructor
@@ -251,6 +252,44 @@ void kruskal::solveWrapper(ThePuzzle& p)
     size_t numEdges = p.getNumEdges();
     for (size_t i = 0; i < numEdges; i++) {
         
+    }
+
+}
+
+std::vector<std::string> sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
+{
+    std::vector<std::string> cnf;
+
+    for (u_int16_t i = 0; i < height; i++) {
+        for (u_int16_t j = 0; j < width; j++) {
+            Cell* current = p.findCell(j,i);
+
+            // All vertical and horizontal lines attached to current cell.
+            std::vector<std::string> lines;
+            if (j != width - 1) lines.push_back("h."+std::to_string(j)+'.'+std::to_string(i)); // right edge
+            if (i != height - 1) lines.push_back("v."+std::to_string(j)+'.'+std::to_string(i)); // down edge
+            if (j != 0) lines.push_back("h."+std::to_string(j-1)+'.'+std::to_string(i)); // left edge
+            if (i != 0) lines.push_back("v."+std::to_string(j)+'.'+std::to_string(i-1)); // up edge
+
+            // Every number cell has only 1 line going in/out, every non-number cell
+            // has 2 lines going in/out. Denoting corresponding logic in CNF.
+            // (1 or 2 True out of 2, 3 or 4 literals).
+            if (current->number == 0) { 
+                if (lines.size() == 2) {
+                    std::ostringstream clause;
+                    clause << lines[0] << " " << lines[1]; // assuming there are exactly 2 lines
+                    cnf.push_back(clause.str());
+                    clause.str("");
+                    clause << "-" << lines[0] << " -" << lines[1];;
+                    cnf.push_back(clause.str());
+                }
+                else if (lines.size() == 3) {
+
+                }
+            }
+
+        
+        }
     }
 
 }
