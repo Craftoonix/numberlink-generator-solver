@@ -28,6 +28,9 @@ class Cell
         Cell* inPath;              // pointer to the cell where the path comes from
         Cell* outPath;             // pointer to the cell where the path goes to
 
+        // SAT members
+        u_int16_t line[MAX_DIRECTIONS];
+
         u_int16_t number; // the number in the cell (0 if empty)
         void setFixed();
         bool isFixedCell() const;
@@ -55,6 +58,10 @@ class ThePuzzle {
     private:
         u_int16_t width;   // and width
         u_int16_t height;  // actual height
+
+        // SAT
+        u_int16_t totalLines;
+        void increaseLine(Cell* addedCell, Direction dir);
 
     public:
         ThePuzzle(u_int16_t w, u_int16_t h, 
@@ -121,6 +128,9 @@ class kruskal : public solver
 
 class sat : public solver
 {
+    private:
+        u_int16_t literals;
+        
     public:
         std::vector<std::string> generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
 };

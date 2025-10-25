@@ -17,6 +17,7 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
     width = w;
     height = h;
     numberPairs = n;
+    totalLines = 0;
 
     // create the grid of cells
     in = new Cell(0,0); // create the first cell;
@@ -27,20 +28,43 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         size_t j = 0;
         if (i != 0) {
             HVconnector = Vconnector;
+
+            // Create a cell downwards
             Vconnector->adjacent[DOWN] = new Cell(j,i);
+            increaseLine(Vconnector, DOWN);
+
+            // Connect it with the cell upwards
             Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
+            increaseLine(Vconnector->adjacent[DOWN], UP);
+
+            // Move help pointers down
             Vconnector = Vconnector->adjacent[DOWN];
             Hconnector = Vconnector;
         }
         for (; j < width; j++) {
             if (j == 0) continue; // skip the first cell
+
+            // Create a cell to the right
             Hconnector->adjacent[RIGHT] = new Cell(j,i);
+            increaseLine(Hconnector, RIGHT);
+
+            // Connect it with the cell to the left
             Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
+            increaseLine(Hconnector->adjacent[RIGHT],LEFT);
+
+            // Move helper pointer to the right
             Hconnector = Hconnector->adjacent[RIGHT];
+
             if (i == 0) continue; // skip the first row
+
+            // Move helper pointer to the right
             HVconnector = HVconnector->adjacent[RIGHT];
+
+            // Connect cells up and down with eachother
             Hconnector->adjacent[UP] = HVconnector;
             HVconnector->adjacent[DOWN] = Hconnector;
+            increaseLine(Hconnector, UP);
+            increaseLine(HVconnector, DOWN);
         }//for j  
     }//for i
 
@@ -89,6 +113,12 @@ ThePuzzle::~ThePuzzle()
     }//for i
     delete Vdeletor;
 }//~ThePuzzle
+
+void ThePuzzle::increaseLine(Cell* addedCell, Direction dir)
+{
+    addedCell->line[dir] = totalLines;
+    totalLines++;
+}
 
 void ThePuzzle::printPuzzle()
 {
@@ -258,7 +288,9 @@ void kruskal::solveWrapper(ThePuzzle& p)
 
 std::vector<std::string> sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
 {
+    literals = p.getNumEdges();
     std::vector<std::string> cnf;
+    std::ofstream file("numberlink.cnf");
 
     for (u_int16_t i = 0; i < height; i++) {
         for (u_int16_t j = 0; j < width; j++) {
