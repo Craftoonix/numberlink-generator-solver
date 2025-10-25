@@ -60,8 +60,8 @@ class ThePuzzle {
         u_int16_t height;  // actual height
 
         // SAT
-        u_int16_t totalLines;
         void increaseLine(Cell* addedCell, Direction dir);
+        u_int16_t totalLines;
 
     public:
         ThePuzzle(u_int16_t w, u_int16_t h, 
@@ -82,6 +82,7 @@ class ThePuzzle {
         size_t getNumEdges() const {
             return ((width - 1) * height) + ((height - 1) * width);
         }
+        size_t getLiterals() const { return totalLines;}
 
 
         /**
