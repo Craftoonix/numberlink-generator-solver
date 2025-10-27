@@ -11,6 +11,12 @@
  */
 enum Direction { UP, RIGHT, DOWN, LEFT };
 
+struct literals
+{
+    std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> v;
+    std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> h;
+    std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c;
+};
 
 /**
  * @brief The Cell class represents a cell in the puzzle
@@ -29,8 +35,9 @@ class Cell
         Cell* outPath;             // pointer to the cell where the path goes to
 
         // SAT members
-        u_int16_t line[MAX_DIRECTIONS];
-
+        u_int16_t line[MAX_DIRECTIONS]; // index of lines starting at 1
+        u_int16_t linesConnected;
+        
         u_int16_t number; // the number in the cell (0 if empty)
         void setFixed();
         bool isFixedCell() const;
@@ -50,6 +57,7 @@ class Cell
         }
 
         u_int16_t x, y;  // coordinates
+        
     private:
         bool isFixed;           // is the cell fixed (given as input)?
 };       
@@ -60,31 +68,34 @@ class ThePuzzle {
         u_int16_t height;  // actual height
 
         // SAT
-        void increaseLine(Cell* addedCell, Direction dir);
         u_int16_t totalLines;
-
-    public:
+        //std::vector<u_int16_t> hlines;
+        //std::vector<u_int16_t> vlines;
+        
+        public:
         ThePuzzle(u_int16_t w, u_int16_t h, 
             std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
             std::pair<u_int16_t,u_int16_t>>> n);
             ~ThePuzzle ();
             
-        u_int16_t numPairs; // number of pairs of numbers
-        /**
-         * @brief Prints the puzzle to the console
-         * 
+            u_int16_t numPairs; // number of pairs of numbers
+            /**
+             * @brief Prints the puzzle to the console
+             * 
          */
         void printPuzzle();
         bool isSolved(); // check if the puzzle is solved
-
+        
         void switchFinder(u_int16_t toNumber, Cell& start, Cell& end);
-
+        
         size_t getNumEdges() const {
             return ((width - 1) * height) + ((height - 1) * width);
         }
         size_t getLiterals() const { return totalLines;}
+        literals lit;
 
-
+        
+        void increaseLine(Cell* addedCell, Direction dir);
         /**
          * @brief finds a cell given its coordinates starting from the cell "in"
          * 
@@ -127,13 +138,25 @@ class kruskal : public solver
         void solveWrapper(ThePuzzle& p) override;
 };
 
-class sat : public solver
+class sat : public solver//, ThePuzzle
 {
     private:
-        u_int16_t literals;
+        u_int16_t nliterals;
+        void generateCombinations(const std::vector<u_int16_t>& elements, u_int16_t r, 
+                                    u_int16_t start, std::vector<u_int16_t>& current, 
+                                        std::vector<std::vector<u_int16_t>>& result);
+        std::vector<std::vector<u_int16_t>> combinations(const std::vector<u_int16_t>& elements,
+                                    u_int16_t r);
+        void doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ofstream & file, bool sign, bool unsign);
+
+        std::vector<std::vector<u_int16_t>> products(const std::vector<std::vector<u_int16_t>> & vectors);
+        void generateProducts(const std::vector<std::vector<u_int16_t>> &vectors, u_int16_t depth, 
+                    std::vector<u_int16_t>& current, std::vector<std::vector<u_int16_t>> &result);
+        void commitLiterals(std::vector<u_int16_t> v, std::ofstream & file, bool sign, bool unsign);
+        u_int16_t findLiteral(ThePuzzle p, u_int16_t x, u_int16_t y, u_int16_t c);
         
     public:
-        std::vector<std::string> generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
+        void generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
 };
 
 
