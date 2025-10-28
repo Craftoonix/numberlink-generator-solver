@@ -329,7 +329,10 @@ bool sat::decode(ThePuzzle &p)
             continue;
         std::tuple<u_int16_t,u_int16_t,u_int16_t> 
             tup = getCoordinate(p, literal);
-        p.findCell(std::get<0>(tup),std::get<1>(tup))->number=std::get<2>(tup);
+        Cell* curr = p.findCell(std::get<0>(tup),std::get<1>(tup));
+        if (curr->number == 0)
+            curr->number = std::get<2>(tup);
+        else if (curr->number != std::get<2>(tup)) std::cout << "OOOF\n";
     }
     file.close();
     return true;
@@ -338,6 +341,7 @@ bool sat::decode(ThePuzzle &p)
 void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height)
 {
     generateCNF(p,width,height);
+    system("/usr/bin/minisat -verb=0 numberlink.cnf output.txt");
     decode(p);
 }
 
@@ -415,7 +419,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                     commitLiterals(lineLiterals, cnf, true, false);
                     break;
                 case 4:
-                    doCombinations(lineLiterals, 3, cnf, true, true);    
+                    doCombinations(lineLiterals, 3, cnf, false, true);    
+                    doCombinations(lineLiterals, 3, cnf, true, false);    
                     break;
                 } // switch linesConnected
             } // else
