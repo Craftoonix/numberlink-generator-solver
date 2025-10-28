@@ -6,6 +6,7 @@
 #include "puzzle.h"
 #include "constants.h"
 #include <sstream>
+#include <cstring>
 
 
 // constructor
@@ -307,6 +308,39 @@ void kruskal::solveWrapper(ThePuzzle& p)
 
 }
 
+bool sat::decode(ThePuzzle &p)
+{
+    std::ifstream file("output.txt");
+    std::string line;
+    std::stringstream literals;
+    int literal;
+
+    getline(file,line);
+    if (strcmp(line.c_str(),"UNSAT")==0)
+        return false;
+
+    while (getline(file,line))
+    {  
+        literals << line;   
+    }
+    while (literals >> literal)
+    {
+        if (literal <= static_cast<int>(p.getNumEdges()))
+            continue;
+        std::tuple<u_int16_t,u_int16_t,u_int16_t> 
+            tup = getCoordinate(p, literal);
+        p.findCell(std::get<0>(tup),std::get<1>(tup))->number=std::get<2>(tup);
+    }
+    file.close();
+    return true;
+}
+
+void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height)
+{
+    generateCNF(p,width,height);
+    decode(p);
+}
+
 void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
 {
     nLiterals = p.lit.totalLiterals;
@@ -438,6 +472,14 @@ u_int16_t sat::findLiteral(ThePuzzle& p, u_int16_t x, u_int16_t y, u_int16_t c)
     for (auto tup : p.lit.c)
         if (std::get<0>(tup) == x && std::get<1>(tup) == y && std::get<2>(tup) == c)
             return std::get<3>(tup);
+    exit(EXIT_FAILURE);
+}
+
+std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getCoordinate(ThePuzzle& p, u_int16_t literal)
+{
+    for (auto tup : p.lit.c)
+        if (std::get<3>(tup) == literal)
+            return std::make_tuple(std::get<0>(tup), std::get<1>(tup), std::get<2>(tup));
     exit(EXIT_FAILURE);
 }
 

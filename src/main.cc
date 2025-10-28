@@ -120,7 +120,7 @@ int main (int argc, char* argv[]) {
     else if (solverProgram == SAT)
     {
         sat SATsolver;
-        SATsolver.generateCNF(numberlink,width,height);
+        SATsolver.solve(numberlink,width,height);
     }
         //.generateCNF(numberlink, width, height);
 

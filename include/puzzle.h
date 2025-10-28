@@ -155,11 +155,14 @@ class sat//, ThePuzzle
                     std::vector<u_int16_t>& current, std::vector<std::vector<u_int16_t>> &result);
         void commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign, bool unsign);
         u_int16_t findLiteral(ThePuzzle& p, u_int16_t x, u_int16_t y, u_int16_t c);
+        bool decode(ThePuzzle & p);
+        std::tuple<u_int16_t,u_int16_t,u_int16_t> getCoordinate(ThePuzzle& p, u_int16_t literal);
         
     public:
         //bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;
        // void solveWrapper(ThePuzzle& p, u_int16_t width, u_int16_t height);
         //void solveWrapper(ThePuzzle& p) override;
+        void solve(ThePuzzle& p, u_int8_t width, u_int8_t height);
         void generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
 };
 
