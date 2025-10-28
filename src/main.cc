@@ -1,13 +1,14 @@
-# include <iostream>
-# include <string>
-# include <fstream>
-# include <cstdlib>
-# include <ctime>
-# include <cstring>
-# include <unistd.h>
-# include "puzzle.h"
-# include "constants.h"
-# include "options.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
+#include <unistd.h>
+#include "puzzle.h"
+#include "constants.h"
+#include "options.h"
+#include "sat.h"
 
 
 enum solverPrograms
