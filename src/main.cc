@@ -9,9 +9,18 @@
 # include "constants.h"
 # include "options.h"
 
+
+enum solverPrograms
+{
+    DFS = 1,
+    SAT = 2,
+};
+
+
 // main program
 int main (int argc, char* argv[]) {
     int opt;
+    u_int8_t solverProgram = 0;
     // parse command line options
     while ((opt = getopt(argc, argv, ":s:i")) != -1) 
     {
@@ -21,9 +30,11 @@ int main (int argc, char* argv[]) {
             // solve the puzzle
             SOLVE_PUZZLE = true;
             //std::string arg(optarg);
-            if (strcmp(optarg, "dfs") == 0) {
-                // only dfs is implemented currently
-            } else {
+            if (strcmp(optarg, "dfs") == 0) 
+                solverProgram = DFS;
+            else if (strcmp(optarg, "sat") == 0)
+                solverProgram = SAT;
+            else {
                 std::cerr << "Error: unknown solving method '" << optarg << "'\n";
                 return EXIT_FAILURE;
             }
@@ -101,8 +112,18 @@ int main (int argc, char* argv[]) {
     if (!SOLVE_PUZZLE) {
         return EXIT_SUCCESS; // nothing more to do
     }
-    dfs solver;
-    solver.solveWrapper(numberlink);
+
+    if (solverProgram == DFS) {
+        dfs DFSsolver;
+        DFSsolver.solveWrapper(numberlink);
+    }
+    else if (solverProgram == SAT)
+    {
+        sat SATsolver;
+        SATsolver.generateCNF(numberlink,width,height);
+    }
+        //.generateCNF(numberlink, width, height);
+
     if (!numberlink.isSolved()) {
         std::cout << "No solution found.\n";
         return EXIT_FAILURE;

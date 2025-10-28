@@ -45,3 +45,4 @@
 
 # numberlink generated files
 numberlink
+*.cnf

@@ -89,9 +89,9 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
     numPairs = counter;
 
     size_t index = 0;
-    for (u_int16_t y = 0; y < height - 1; y++)
+    for (u_int16_t y = 0; y < height ; y++)
     {
-        for (u_int16_t x = 0; x < width - 1; x++)
+        for (u_int16_t x = 0; x < width; x++)
         {
             for (u_int16_t c = 1; c < numPairs + 1; c++)
             {
@@ -100,6 +100,7 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
             }
         }
     }
+    lit.totalLiterals = index + totalLines;
 }//ThePuzzle
 
 // destructor
@@ -310,25 +311,17 @@ void kruskal::solveWrapper(ThePuzzle& p)
 
 void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
 {
-    nliterals = p.getLiterals();
-    std::vector<std::string> cnf;
+    nLiterals = p.lit.totalLiterals;
+    nClauses = 0;
     std::ofstream file("numberlink.cnf");
+    std::ostringstream cnf;
     if (!file.is_open()){
         return;
     }
 
-
     for (u_int16_t i = 0; i < height; i++) {
         for (u_int16_t j = 0; j < width; j++) {
             Cell* current = p.findCell(j,i);
-            // // sort connected lines
-            // u_int16_t connectedLines[MAX_DIRECTIONS] = {0};
-            // size_t index = 0;
-            // for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
-            // {
-            //     connectedLines[index] = current->line[dir];
-            //     index++;
-            // }
 
             std::vector<u_int16_t> lineLiterals;
             for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
@@ -347,20 +340,19 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             // Every number cell has only 1 line going in/out, every non-number cell
             // has 2 lines going in/out. Denoting corresponding logic in CNF.
             // (1 or 2 True out of 2, 3 or 4 literals).
-            
             if (current->number > 0) {           
                 switch (current->linesConnected)
                 {
                 case 2:
-                    commitLiterals(lineLiterals, file, true, true);
+                    commitLiterals(lineLiterals, cnf, true, true);
                     break;
                 case 3:
-                    doCombinations(lineLiterals, 2, file, true, false);
-                    commitLiterals(lineLiterals, file, false, true);
+                    doCombinations(lineLiterals, 2, cnf, true, false);
+                    commitLiterals(lineLiterals, cnf, false, true);
                     break;
                 case 4:
-                    doCombinations(lineLiterals, 2, file, true, false);
-                    commitLiterals(lineLiterals, file, false, true);
+                    doCombinations(lineLiterals, 2, cnf, true, false);
+                    commitLiterals(lineLiterals, cnf, false, true);
                     break;
                 } // Switch linesConnected
                     // std::ostringstream clause;
@@ -374,86 +366,91 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                 switch (current->linesConnected)
                 {
                 case 2:
-                    commitLiterals(lineLiterals, file, false, true);
+                    commitLiterals(lineLiterals, cnf, false, true);
                     break;
                 case 3:
-                    doCombinations(lineLiterals, 2, file, false, true);
-                    commitLiterals(lineLiterals, file, true, false);
+                    doCombinations(lineLiterals, 2, cnf, false, true);
+                    commitLiterals(lineLiterals, cnf, true, false);
                     break;
                 case 4:
-                    doCombinations(lineLiterals, 3, file, true, true);    
+                    doCombinations(lineLiterals, 3, cnf, true, true);    
                     break;
                 } // switch linesConnected
             } // else
 
             std::vector<u_int16_t> colorVars;
-            for (size_t c = 1; c <= p.numPairs; c++)
+            for (u_int16_t c = 1; c <= p.numPairs; c++)
                 colorVars.push_back(findLiteral(p,j,i,c));
-            doCombinations(colorVars, 2, file, true, false);
-            commitLiterals(colorVars, file, false, true);
+            doCombinations(colorVars, 2, cnf, true, false);
+            commitLiterals(colorVars, cnf, false, true);
 
             std::vector<std::vector<u_int16_t>> currColors;
             if (current->line[RIGHT] != 0)
             {
                 for (size_t c = 1; c <= p.numPairs; c++)
                 {
-                    currColors.at(c).at(0) = findLiteral(p,j,i,c);
-                    currColors.at(c).at(1) = findLiteral(p,j+1,i,c);
+                    std::vector<u_int16_t> v = {findLiteral(p,j,i,c), findLiteral(p,j+1,i,c)};
+                    currColors.push_back(v);
                 }
                 for (auto product : products(currColors))
                 {
-                    file << -current->line[RIGHT] << " ";
-                    commitLiterals(product,file,false,true);
+                    cnf << -current->line[RIGHT] << " ";
+                    commitLiterals(product,cnf,false,true);
                 }
             }
             if (current->line[DOWN] != 0)
             {
-                for (size_t c = 0; c <= p.numPairs; c++)
+                for (size_t c = 1; c <= p.numPairs; c++)
                 {
-                    currColors.at(c).at(0) = findLiteral(p,j,i,c+1);
-                    currColors.at(c).at(1) = findLiteral(p,j,i+1,c+1);
+                    std::vector<u_int16_t> v = {findLiteral(p,j,i,c), findLiteral(p,j,i+1,c)};
+                    currColors.push_back(v);
                 }
                 for (auto product : products(currColors))
                 {
-                    file << -current->line[DOWN] << " ";
-                    commitLiterals(product, file, false, true);
+                    cnf << -current->line[DOWN] << " ";
+                    commitLiterals(product, cnf, false, true);
                 }
             }  
         } // for j
     } // for i
     for (size_t c = 1; c <= p.numPairs; c++)
     {
-        file << findLiteral(p,p.numberPairs.at(c-1).first.first, p.numberPairs.at(c-1).first.second,c) << std::endl;
-        file << findLiteral(p,p.numberPairs.at(c-1).second.first, p.numberPairs.at(c-1).second.second,c) << std::endl;
+        cnf << findLiteral(p,p.numberPairs.at(c-1).first.first, p.numberPairs.at(c-1).first.second,c) << " " << 0 << std::endl;
+        cnf << findLiteral(p,p.numberPairs.at(c-1).second.first, p.numberPairs.at(c-1).second.second,c) << " " << 0 << std::endl;
+        nClauses += 2;
     }
+
+    file << "p cnf " << nLiterals << " " << nClauses << std::endl;
+    file << cnf.str();
 } // generateCNF
 
-u_int16_t sat::findLiteral(ThePuzzle p, u_int16_t x, u_int16_t y, u_int16_t c)
+u_int16_t sat::findLiteral(ThePuzzle& p, u_int16_t x, u_int16_t y, u_int16_t c)
 {
     for (auto tup : p.lit.c)
-        if (std::get<0>(tup) == x && std::get<1>(tup) == y, std::get<2>(tup) == c)
+        if (std::get<0>(tup) == x && std::get<1>(tup) == y && std::get<2>(tup) == c)
             return std::get<3>(tup);
-    return 0;
+    exit(EXIT_FAILURE);
 }
 
-void sat::doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ofstream & file, bool sign, bool unsign)
+void sat::doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ostringstream & cnf, bool sign, bool unsign)
 {
     std::vector<std::vector<u_int16_t>> comboVector = combinations(v,r);
     for (auto & combination: comboVector)
-        commitLiterals(combination, file, sign, unsign);
+        commitLiterals(combination, cnf, sign, unsign);
     
 }
 
 //void sat::doProducts(std::)
 
-void sat::commitLiterals(std::vector<u_int16_t> v, std::ofstream & file, bool sign, bool unsign)
+void sat::commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign, bool unsign)
 {
     for (u_int16_t literal : v)
     {
-        if (sign)   file << -literal << " ";
-        if (unsign) file << literal  << " ";
+        if (sign)   cnf << -literal << " ";
+        if (unsign) cnf << literal  << " ";
     }
-    file << std::endl;
+    cnf << 0 << std::endl;
+    nClauses++;
 
 }
 

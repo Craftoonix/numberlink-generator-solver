@@ -16,6 +16,7 @@ struct literals
     std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> v;
     std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> h;
     std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c;
+    u_int16_t totalLiterals;
 };
 
 /**
@@ -76,9 +77,9 @@ class ThePuzzle {
         ThePuzzle(u_int16_t w, u_int16_t h, 
             std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
             std::pair<u_int16_t,u_int16_t>>> n);
-            ~ThePuzzle ();
+        ~ThePuzzle ();
             
-            u_int16_t numPairs; // number of pairs of numbers
+        u_int16_t numPairs; // number of pairs of numbers
             /**
              * @brief Prints the puzzle to the console
              * 
@@ -138,24 +139,28 @@ class kruskal : public solver
         void solveWrapper(ThePuzzle& p) override;
 };
 
-class sat : public solver//, ThePuzzle
+class sat//, ThePuzzle
 {
     private:
-        u_int16_t nliterals;
+        u_int16_t nLiterals;
+        u_int32_t nClauses;
         void generateCombinations(const std::vector<u_int16_t>& elements, u_int16_t r, 
                                     u_int16_t start, std::vector<u_int16_t>& current, 
                                         std::vector<std::vector<u_int16_t>>& result);
         std::vector<std::vector<u_int16_t>> combinations(const std::vector<u_int16_t>& elements,
                                     u_int16_t r);
-        void doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ofstream & file, bool sign, bool unsign);
+        void doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ostringstream & cnf, bool sign, bool unsign);
 
         std::vector<std::vector<u_int16_t>> products(const std::vector<std::vector<u_int16_t>> & vectors);
         void generateProducts(const std::vector<std::vector<u_int16_t>> &vectors, u_int16_t depth, 
                     std::vector<u_int16_t>& current, std::vector<std::vector<u_int16_t>> &result);
-        void commitLiterals(std::vector<u_int16_t> v, std::ofstream & file, bool sign, bool unsign);
-        u_int16_t findLiteral(ThePuzzle p, u_int16_t x, u_int16_t y, u_int16_t c);
+        void commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign, bool unsign);
+        u_int16_t findLiteral(ThePuzzle& p, u_int16_t x, u_int16_t y, u_int16_t c);
         
     public:
+        //bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;
+       // void solveWrapper(ThePuzzle& p, u_int16_t width, u_int16_t height);
+        //void solveWrapper(ThePuzzle& p) override;
         void generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
 };
 
