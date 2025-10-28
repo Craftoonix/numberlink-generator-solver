@@ -46,3 +46,4 @@
 # numberlink generated files
 numberlink
 *.cnf
+output.*

@@ -138,7 +138,6 @@ void ThePuzzle::increaseLine(Cell* addedCell, Direction dir)
         lit.h.push_back(std::make_tuple(addedCell->x-1,addedCell->y,totalLines));
     if (dir == UP)
         lit.v.push_back(std::make_tuple(addedCell->x,addedCell->y,totalLines));
-    addedCell->linesConnected++;
 }
 
 void ThePuzzle::printPuzzle()
@@ -192,7 +191,6 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
     inPath = nullptr;
     outPath = nullptr;
     isFixed = false;
-    linesConnected = 0;
 }//Cell
 
 bool Cell::operator==(const Cell& other) const
@@ -319,9 +317,9 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
         return;
     }
 
-    for (u_int16_t i = 0; i < height; i++) {
-        for (u_int16_t j = 0; j < width; j++) {
-            Cell* current = p.findCell(j,i);
+    for (u_int16_t x = 0; x < width; x++) {
+        for (u_int16_t y = 0; y < height; y++) {
+            Cell* current = p.findCell(x,y);
 
             std::vector<u_int16_t> lineLiterals;
             for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
@@ -329,6 +327,11 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                 if (current->line[dir] == 0) continue;
                 lineLiterals.push_back(current->line[dir]);
             }
+
+            u_int16_t nLines = 0;
+            for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
+                if (current->adjacent[dir] != nullptr)
+                    nLines++;
 
             // All vertical and horizontal lines attached to current cell.
             //std::vector<std::string> lines;
@@ -341,10 +344,13 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             // has 2 lines going in/out. Denoting corresponding logic in CNF.
             // (1 or 2 True out of 2, 3 or 4 literals).
             if (current->number > 0) {           
-                switch (current->linesConnected)
+                switch (nLines)
                 {
                 case 2:
-                    commitLiterals(lineLiterals, cnf, true, true);
+                    cnf << lineLiterals[0] << " " << lineLiterals[1] << " " << 0 << std::endl;
+                    cnf << -lineLiterals[0] << " " << -lineLiterals[1] << " " << 0 << std::endl;
+                    nClauses += 2;
+                    //commitLiterals(lineLiterals, cnf, true, true);
                     break;
                 case 3:
                     doCombinations(lineLiterals, 2, cnf, true, false);
@@ -363,10 +369,12 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                     // cnf.push_back(clause.str());
             } // if number
             else {
-                switch (current->linesConnected)
+                switch (nLines)
                 {
                 case 2:
-                    commitLiterals(lineLiterals, cnf, false, true);
+                    cnf << lineLiterals[0] << " " << 0 << std::endl;
+                    cnf << lineLiterals[1] << " " << 0 << std::endl;
+                    //commitLiterals(lineLiterals, cnf, false, true);
                     break;
                 case 3:
                     doCombinations(lineLiterals, 2, cnf, false, true);
@@ -380,7 +388,7 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
 
             std::vector<u_int16_t> colorVars;
             for (u_int16_t c = 1; c <= p.numPairs; c++)
-                colorVars.push_back(findLiteral(p,j,i,c));
+                colorVars.push_back(findLiteral(p,x,y,c));
             doCombinations(colorVars, 2, cnf, true, false);
             commitLiterals(colorVars, cnf, false, true);
 
@@ -389,8 +397,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             {
                 for (size_t c = 1; c <= p.numPairs; c++)
                 {
-                    std::vector<u_int16_t> v = {findLiteral(p,j,i,c), findLiteral(p,j+1,i,c)};
-                    currColors.push_back(v);
+                    std::vector<u_int16_t> h = {findLiteral(p,x,y,c), findLiteral(p,x+1,y,c)};
+                    currColors.push_back(h);
                 }
                 for (auto product : products(currColors))
                 {
@@ -398,11 +406,12 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                     commitLiterals(product,cnf,false,true);
                 }
             }
+            currColors.clear();
             if (current->line[DOWN] != 0)
             {
                 for (size_t c = 1; c <= p.numPairs; c++)
                 {
-                    std::vector<u_int16_t> v = {findLiteral(p,j,i,c), findLiteral(p,j,i+1,c)};
+                    std::vector<u_int16_t> v = {findLiteral(p,x,y,c), findLiteral(p,x,y+1,c)};
                     currColors.push_back(v);
                 }
                 for (auto product : products(currColors))

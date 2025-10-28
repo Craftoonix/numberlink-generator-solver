@@ -37,7 +37,6 @@ class Cell
 
         // SAT members
         u_int16_t line[MAX_DIRECTIONS]; // index of lines starting at 1
-        u_int16_t linesConnected;
         
         u_int16_t number; // the number in the cell (0 if empty)
         void setFixed();
