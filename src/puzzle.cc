@@ -504,10 +504,7 @@ void sat::doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ostringstre
     std::vector<std::vector<u_int16_t>> comboVector = combinations(v,r);
     for (auto & combination: comboVector)
         commitLiterals(combination, cnf, sign, unsign);
-    
 }
-
-//void sat::doProducts(std::)
 
 void sat::commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign, bool unsign)
 {

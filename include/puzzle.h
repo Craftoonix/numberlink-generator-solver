@@ -314,7 +314,8 @@ class sat//, ThePuzzle
         void solve(ThePuzzle& p, u_int8_t width, u_int8_t height);
         
         /**
-         * @brief Encodes the puzzle into CNF
+         * @brief Encodes the puzzle into CNF based on 
+         * https://github.com/uguryavuz/numberlink-solver/blob/master/NumberlinkPuzzle.py
          * 
          * @param p The puzzle
          * @param width The width of the puzzle
