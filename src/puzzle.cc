@@ -89,6 +89,7 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
     }
     numPairs = counter;
 
+    // Assign literals for SAT
     size_t index = 0;
     for (u_int16_t y = 0; y < height ; y++)
     {
@@ -131,8 +132,11 @@ ThePuzzle::~ThePuzzle()
 
 void ThePuzzle::increaseLine(Cell* addedCell, Direction dir)
 {
+    // assign literal
     totalLines++;
     addedCell->line[dir] = totalLines;
+    // vertical line literal = true if cell at (x,y) is connected to cell at (x,y+1)
+    // horizontal line literal = true if cell at (x,y) is connected to cell at (x+1,y)
     if (dir == DOWN)
         lit.v.push_back(std::make_tuple(addedCell->x,addedCell->y-1,totalLines));
     if (dir == RIGHT)
@@ -315,24 +319,32 @@ bool sat::decode(ThePuzzle &p)
     std::stringstream literals;
     int literal;
 
+    // get the first line to determine satisfiability
     getline(file,line);
     if (strcmp(line.c_str(),"UNSAT")==0)
         return false;
 
+    // every line after contains what literal is true
     while (getline(file,line))
     {  
         literals << line;   
     }
+
+    // parse line to individual vars
     while (literals >> literal)
     {
+        // ignore negatives and end of line 0's
         if (literal <= static_cast<int>(p.getNumEdges()))
             continue;
+        
+        // look up coordinate and number
         std::tuple<u_int16_t,u_int16_t,u_int16_t> 
             tup = getCoordinate(p, literal);
         Cell* curr = p.findCell(std::get<0>(tup),std::get<1>(tup));
-        if (curr->number == 0)
-            curr->number = std::get<2>(tup);
-        else if (curr->number != std::get<2>(tup)) std::cout << "OOOF\n";
+
+        // assign the number to its cell
+        curr->number = std::get<2>(tup);
+
     }
     file.close();
     return true;
@@ -340,9 +352,12 @@ bool sat::decode(ThePuzzle &p)
 
 void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height)
 {
-    generateCNF(p,width,height);
+    generateCNF(p,width,height); //convert puzzle to CNF
+
+    // call minisat to determine what literals satisfy the puzzle
     system("/usr/bin/minisat -verb=0 numberlink.cnf output.txt");
-    decode(p);
+    
+    decode(p);  // decode the literals
 }
 
 void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
@@ -355,10 +370,12 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
         return;
     }
 
+    // go through each cell
     for (u_int16_t x = 0; x < width; x++) {
         for (u_int16_t y = 0; y < height; y++) {
             Cell* current = p.findCell(x,y);
 
+            // Gather all line literals
             std::vector<u_int16_t> lineLiterals;
             for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
             {
@@ -366,71 +383,63 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                 lineLiterals.push_back(current->line[dir]);
             }
 
+            // Determine the amount of lines connected to cell
             u_int16_t nLines = 0;
             for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
                 if (current->adjacent[dir] != nullptr)
                     nLines++;
 
-            // All vertical and horizontal lines attached to current cell.
-            //std::vector<std::string> lines;
-            // if (j != width - 1) lines.push_back("h."+std::to_string(j)+'.'+std::to_string(i)); // right edge
-            // if (i != height - 1) lines.push_back("v."+std::to_string(j)+'.'+std::to_string(i)); // down edge
-            // if (j != 0) lines.push_back("h."+std::to_string(j-1)+'.'+std::to_string(i)); // left edge
-            // if (i != 0) lines.push_back("v."+std::to_string(j)+'.'+std::to_string(i-1)); // up edge
 
-            // Every number cell has only 1 line going in/out, every non-number cell
-            // has 2 lines going in/out. Denoting corresponding logic in CNF.
+            // Every nu in/out.mber cell has only 1 line going in/out, every non-number cell
+            // has 2 lines going Denoting corresponding logic in CNF.
             // (1 or 2 True out of 2, 3 or 4 literals).
             if (current->number > 0) {           
                 switch (nLines)
                 {
-                case 2:
+                case 2: // 1 true out of 2 lines
                     cnf << lineLiterals[0] << " " << lineLiterals[1] << " " << 0 << std::endl;
                     cnf << -lineLiterals[0] << " " << -lineLiterals[1] << " " << 0 << std::endl;
                     nClauses += 2;
                     //commitLiterals(lineLiterals, cnf, true, true);
                     break;
-                case 3:
+                case 3: // 1 true out of 3 lines
                     doCombinations(lineLiterals, 2, cnf, true, false);
                     commitLiterals(lineLiterals, cnf, false, true);
                     break;
-                case 4:
+                case 4: // 1 true out of 4 lines
                     doCombinations(lineLiterals, 2, cnf, true, false);
                     commitLiterals(lineLiterals, cnf, false, true);
                     break;
-                } // Switch linesConnected
-                    // std::ostringstream clause;
-                    // clause << lines[0] << " " << lines[1]; // assuming there are exactly 2 lines
-                    // cnf.push_back(clause.str());
-                    // clause.str("");
-                    // clause << "-" << lines[0] << " -" << lines[1];;
-                    // cnf.push_back(clause.str());
+                } 
             } // if number
             else {
                 switch (nLines)
                 {
-                case 2:
+                case 2: // 2 true out of 2 lines
                     cnf << lineLiterals[0] << " " << 0 << std::endl;
                     cnf << lineLiterals[1] << " " << 0 << std::endl;
                     //commitLiterals(lineLiterals, cnf, false, true);
                     break;
-                case 3:
+                case 3: // 2 true out of 3 lines
                     doCombinations(lineLiterals, 2, cnf, false, true);
                     commitLiterals(lineLiterals, cnf, true, false);
                     break;
-                case 4:
+                case 4: // 2 true out of 4 lines
                     doCombinations(lineLiterals, 3, cnf, false, true);    
                     doCombinations(lineLiterals, 3, cnf, true, false);    
                     break;
                 } // switch linesConnected
             } // else
 
+            // Number variables for current cell. Only 1 is True. We essentially create a
+            // CNF XOR-gate.
             std::vector<u_int16_t> colorVars;
             for (u_int16_t c = 1; c <= p.numPairs; c++)
                 colorVars.push_back(findLiteral(p,x,y,c));
             doCombinations(colorVars, 2, cnf, true, false);
             commitLiterals(colorVars, cnf, false, true);
 
+            // Vertical/horizontal line implies number shared with adjacent cell.
             std::vector<std::vector<u_int16_t>> currColors;
             if (current->line[RIGHT] != 0)
             {
@@ -461,6 +470,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             }  
         } // for j
     } // for i
+
+    // Add respective numbers to given number locations.
     for (size_t c = 1; c <= p.numPairs; c++)
     {
         cnf << findLiteral(p,p.numberPairs.at(c-1).first.first, p.numberPairs.at(c-1).first.second,c) << " " << 0 << std::endl;
