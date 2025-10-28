@@ -7,8 +7,9 @@
 #workspace settings
 INC_DIR = include
 SRC_DIR = src
+BIN_DIR = build
 SOURCES = $(shell find $(SRC_DIR)/ -name '*.cc')
-OBJECTS = $(SOURCES:.cc=.o)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cc,$(BIN_DIR)/%.o,$(SOURCES))
 DEPS = $(OBJECTS:.o=.d)
 TARGET = numberlink
 
@@ -19,28 +20,30 @@ CPPFLAGS = -I $(INC_DIR) -Wall -Wextra -pedantic
 
 .PHONY: all exec clean debug release
 
-#release build
+# Release build
 release: CFLAGS += -O3 -DNDEBUG
 release: all
 
-#debugging build
+# Debugging build
 debug: CFLAGS += -O0 -DDEBUG -ggdb3
 debug: all
 
-#builds the TARGET binary
-all: $(TARGET)
+# Builds the TARGET binary
+all: $(BIN_DIR) $(TARGET)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
-#compiles every .cc file in SRC_DIR
+# Compiles every .cc file in SRC_DIR
 -include $(DEPS)
-%.o: %.cc
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.cc
 	$(CC) $(CFLAGS) $(CPPFLAGS) -MMD -o $@ -c $<
 
-#utility commands
+# Utility commands
 exec:
 	./${TARGET}
 clean:
-	rm -f ${OBJECTS} ${DEPS} ${TARGET}
-
+	rm -f ${BIN_DIR}/*.o ${BIN_DIR}/*.d ${TARGET}
