@@ -18,56 +18,9 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
     width = w;
     height = h;
     numberPairs = n;
-    totalLines = 0;
 
     // create the grid of cells
-    in = new Cell(0,0); // create the first cell;
-    Cell* Hconnector = in;
-    Cell* Vconnector = in;
-    Cell* HVconnector = in;
-    for (size_t i = 0; i < height; i++) {
-        size_t j = 0;
-        if (i != 0) {
-            HVconnector = Vconnector;
-
-            // Create a cell downwards
-            Vconnector->adjacent[DOWN] = new Cell(j,i);
-            increaseLine(Vconnector, DOWN);
-
-            // Connect it with the cell upwards
-            Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
-            Vconnector->adjacent[DOWN]->line[UP] = Vconnector->line[DOWN];
-
-            // Move help pointers down
-            Vconnector = Vconnector->adjacent[DOWN];
-            Hconnector = Vconnector;
-        }
-        for (; j < width; j++) {
-            if (j == 0) continue; // skip the first cell
-
-            // Create a cell to the right
-            Hconnector->adjacent[RIGHT] = new Cell(j,i);
-            increaseLine(Hconnector, RIGHT);
-
-            // Connect it with the cell to the left
-            Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
-            Hconnector->adjacent[RIGHT]->line[LEFT] = Hconnector->line[RIGHT];
-
-            // Move helper pointer to the right
-            Hconnector = Hconnector->adjacent[RIGHT];
-
-            if (i == 0) continue; // skip the first row
-
-            // Move helper pointer to the right
-            HVconnector = HVconnector->adjacent[RIGHT];
-
-            // Connect cells up and down with eachother
-            Hconnector->adjacent[UP] = HVconnector;
-            HVconnector->adjacent[DOWN] = Hconnector;
-            increaseLine(Hconnector, UP);
-            HVconnector->line[DOWN] = Hconnector->line[UP];
-        }//for j  
-    }//for i
+    createGrid();
 
     // assign the numbers to the cells
     size_t counter = 0;
@@ -88,21 +41,6 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         assigner2->setFixed();
     }
     numPairs = counter;
-
-    // Assign literals for SAT
-    size_t index = 0;
-    for (u_int16_t y = 0; y < height ; y++)
-    {
-        for (u_int16_t x = 0; x < width; x++)
-        {
-            for (u_int16_t c = 1; c < numPairs + 1; c++)
-            {
-                index++;
-                lit.c.push_back(std::make_tuple(x,y,c,index + totalLines));
-            }
-        }
-    }
-    lit.totalLiterals = index + totalLines;
 }//ThePuzzle
 
 // destructor
@@ -130,20 +68,50 @@ ThePuzzle::~ThePuzzle()
     delete Vdeletor;
 }//~ThePuzzle
 
-void ThePuzzle::increaseLine(Cell* addedCell, Direction dir)
+void ThePuzzle::createGrid()
 {
-    // assign literal
-    totalLines++;
-    addedCell->line[dir] = totalLines;
-    // vertical line literal = true if cell at (x,y) is connected to cell at (x,y+1)
-    // horizontal line literal = true if cell at (x,y) is connected to cell at (x+1,y)
-    if (dir == DOWN)
-        lit.v.push_back(std::make_tuple(addedCell->x,addedCell->y-1,totalLines));
-    if (dir == RIGHT)
-        lit.h.push_back(std::make_tuple(addedCell->x-1,addedCell->y,totalLines));
-    if (dir == UP)
-        lit.v.push_back(std::make_tuple(addedCell->x,addedCell->y,totalLines));
-}
+    in = new Cell(0,0); // create the first cell;
+    Cell* Hconnector = in;
+    Cell* Vconnector = in;
+    Cell* HVconnector = in;
+    for (size_t y = 0; y < height; y++) {
+        size_t x = 0;
+        if (y != 0) {
+            HVconnector = Vconnector;
+
+            // Create a cell downwards
+            Vconnector->adjacent[DOWN] = new Cell(x,y);
+
+            // Connect it with the cell upwards
+            Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
+
+            // Move help pointers down
+            Vconnector = Vconnector->adjacent[DOWN];
+            Hconnector = Vconnector;
+        }
+        for (; x < width; x++) {
+            if (x == 0) continue; // skip the first cell
+
+            // Create a cell to the right
+            Hconnector->adjacent[RIGHT] = new Cell(x,y);
+
+            // Connect it with the cell to the left
+            Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
+
+            // Move helper pointer to the right
+            Hconnector = Hconnector->adjacent[RIGHT];
+
+            if (y == 0) continue; // skip the first row
+
+            // Move helper pointer to the right
+            HVconnector = HVconnector->adjacent[RIGHT];
+
+            // Connect cells up and down with eachother
+            Hconnector->adjacent[UP] = HVconnector;
+            HVconnector->adjacent[DOWN] = Hconnector;
+        } // for x  
+    } // for y
+} // ThePuzzle::createGrid
 
 void ThePuzzle::printPuzzle()
 {
@@ -188,7 +156,6 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
 {
     for (size_t i = 0; i < MAX_DIRECTIONS; i++) {
         adjacent[i] = nullptr;
-        line[i] = 0;
     }
     x = x_coord;
     y = y_coord;
@@ -296,10 +263,10 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
 
 void dfs::solveWrapper(ThePuzzle& p)
 {
-    solve(p.findCell(p.numberPairs.at(0).first.first,
-                     p.numberPairs.at(0).first.second),
-          p.findCell(p.numberPairs.at(0).second.first,
-                     p.numberPairs.at(0).second.second),
+    solve(p.findCell(p.numberPairs.front().first.first,
+                     p.numberPairs.front().first.second),
+          p.findCell(p.numberPairs.front().second.first,
+                     p.numberPairs.front().second.second),
           p, 1);
 }
 

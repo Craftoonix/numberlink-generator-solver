@@ -13,18 +13,6 @@ enum Direction {UP, RIGHT, DOWN, LEFT};
 
 
 /**
- * @brief Blueprint of a struct containing all literals
- * 
- */
-struct literals
-{
-    std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> v;
-    std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> h;
-    std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c;
-    u_int16_t totalLiterals;
-};
-
-/**
  * @brief The Cell class represents a cell in the puzzle
  * 
  */
@@ -39,9 +27,6 @@ class Cell
         // Kruskal's algorithm members
         Cell* inPath;              // pointer to the cell where the path comes from
         Cell* outPath;             // pointer to the cell where the path goes to
-
-        // SAT members
-        u_int16_t line[MAX_DIRECTIONS]; // index of lines starting at 1
         
         u_int16_t number; // the number in the cell (0 if empty)
         
@@ -89,8 +74,11 @@ class ThePuzzle {
         u_int16_t width;   // and width
         u_int16_t height;  // actual height
 
-        // SAT
-        u_int16_t totalLines;
+        /**
+         * @brief Create the grid of the puzzle using linked lists
+         * 
+         */
+        void createGrid();
         
         public:
         ThePuzzle(u_int16_t w, u_int16_t h, 
@@ -131,21 +119,6 @@ class ThePuzzle {
             return ((width - 1) * height) + ((height - 1) * width);
         }
 
-        /**
-         * @brief Get the Literals object
-         * 
-         * @return size_t 
-         */
-        size_t getLiterals() const { return totalLines;}
-        literals lit; // Struct in which contains all the literals
-
-        /**
-         * @brief Attaches a line literal in the direction the line is pointed to
-         * 
-         * @param addedCell The to be added cell
-         * @param dir The direction the cell points from
-         */
-        void increaseLine(Cell* addedCell, Direction dir);
         
         /**
          * @brief finds a cell given its coordinates starting from the cell "in"

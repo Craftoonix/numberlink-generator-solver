@@ -1,5 +1,53 @@
 #include "sat.h"
+#include <iostream>
 
+
+void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, ThePuzzle & p)
+{
+    // assign line literals
+    Cell* assigner, *Vconnector;
+    assigner = Vconnector = p.in;
+    u_int16_t litNumber = 0;
+
+    while (Vconnector != nullptr)
+    {
+        while(assigner != nullptr)
+        {
+
+            if (assigner->adjacent[UP] != nullptr) {
+                litNumber++;
+                lit.v.push_back(std::make_tuple(assigner->x,assigner->y-1,litNumber));
+                //std::cout<< assigner->x << " " << assigner->y-1 << " " << litNumber << "y"<< std::endl;
+            }
+
+            if (assigner->adjacent[RIGHT] != nullptr)
+            {
+                litNumber++;
+                lit.h.push_back(std::make_tuple(assigner->x,assigner->y,litNumber));
+                //std::cout<< assigner->x << " " << assigner->y << " " << litNumber << "y" <<std::endl;
+            }
+            assigner = assigner->adjacent[RIGHT];
+        }
+        Vconnector = Vconnector->adjacent[DOWN];
+        assigner = Vconnector;
+    }
+    
+
+    // Assign color literals
+    // u_int16_t totalLines = p.getNumEdges();
+    lit.totalLiterals = litNumber;
+    for (u_int16_t y = 0; y < height ; y++)
+    {
+        for (u_int16_t x = 0; x < width; x++)
+        {
+            for (u_int16_t c = 1; c < nPairs + 1; c++)
+            {
+                lit.totalLiterals++;
+                lit.c.push_back(std::make_tuple(x,y,c,lit.totalLiterals));
+            }
+        }
+    }  
+}
 
 bool sat::decode(ThePuzzle &p)
 {
@@ -15,9 +63,7 @@ bool sat::decode(ThePuzzle &p)
 
     // every line after contains what literal is true
     while (getline(file,line))
-    {  
         literals << line;   
-    }
 
     // parse line to individual vars
     while (literals >> literal)
@@ -28,7 +74,7 @@ bool sat::decode(ThePuzzle &p)
         
         // look up coordinate and number
         std::tuple<u_int16_t,u_int16_t,u_int16_t> 
-            tup = getCoordinate(p, literal);
+        tup = getCoordinate(literal);
         Cell* curr = p.findCell(std::get<0>(tup),std::get<1>(tup));
 
         // assign the number to its cell
@@ -39,8 +85,9 @@ bool sat::decode(ThePuzzle &p)
     return true;
 }
 
-void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height)
+void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height, u_int8_t nPairs)
 {
+    assignLiterals(width, height, nPairs, p);
     generateCNF(p,width,height); //convert puzzle to CNF
 
     // call minisat to determine what literals satisfy the puzzle
@@ -51,33 +98,32 @@ void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height)
 
 void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
 {
-    nLiterals = p.lit.totalLiterals;
+    nLiterals = lit.totalLiterals;
     nClauses = 0;
     std::ofstream file("numberlink.cnf");
     std::ostringstream cnf;
     if (!file.is_open()){
         return;
     }
-
+    
     // go through each cell
-    for (u_int16_t x = 0; x < width; x++) {
-        for (u_int16_t y = 0; y < height; y++) {
+    for (u_int16_t y = 0; y < height; y++) {
+        for (u_int16_t x = 0; x < width; x++) {
             Cell* current = p.findCell(x,y);
 
-            // Gather all line literals
+            // Gather all line literals connected to current cell
             std::vector<u_int16_t> lineLiterals;
-            for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
-            {
-                if (current->line[dir] == 0) continue;
-                lineLiterals.push_back(current->line[dir]);
-            }
+            if (x != 0)
+                lineLiterals.push_back(findLineLiteral(x-1, y, true));
+            if (x != (width - 1))
+                lineLiterals.push_back(findLineLiteral(x, y, true));
+            if (y != 0)
+                lineLiterals.push_back(findLineLiteral(x, y-1, false));
+            if (y != (height - 1))
+                lineLiterals.push_back(findLineLiteral(x, y, false));
 
             // Determine the amount of lines connected to cell
-            u_int16_t nLines = 0;
-            for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
-                if (current->adjacent[dir] != nullptr)
-                    nLines++;
-
+            u_int16_t nLines = lineLiterals.size();
 
             // Every nu in/out.mber cell has only 1 line going in/out, every non-number cell
             // has 2 lines going Denoting corresponding logic in CNF.
@@ -124,36 +170,36 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             // CNF XOR-gate.
             std::vector<u_int16_t> colorVars;
             for (u_int16_t c = 1; c <= p.numPairs; c++)
-                colorVars.push_back(findLiteral(p,x,y,c));
+                colorVars.push_back(findNumberLiteral(x,y,c));
             doCombinations(colorVars, 2, cnf, true, false);
             commitLiterals(colorVars, cnf, false, true);
 
             // Vertical/horizontal line implies number shared with adjacent cell.
             std::vector<std::vector<u_int16_t>> currColors;
-            if (current->line[RIGHT] != 0)
+            if (x != (width - 1))
             {
                 for (size_t c = 1; c <= p.numPairs; c++)
                 {
-                    std::vector<u_int16_t> h = {findLiteral(p,x,y,c), findLiteral(p,x+1,y,c)};
+                    std::vector<u_int16_t> h = {findNumberLiteral(x,y,c), findNumberLiteral(x+1,y,c)};
                     currColors.push_back(h);
                 }
                 for (auto product : products(currColors))
                 {
-                    cnf << -current->line[RIGHT] << " ";
+                    cnf << -findLineLiteral(x,y,true) << " ";
                     commitLiterals(product,cnf,false,true);
                 }
             }
             currColors.clear();
-            if (current->line[DOWN] != 0)
+            if (y != (height - 1))
             {
                 for (size_t c = 1; c <= p.numPairs; c++)
                 {
-                    std::vector<u_int16_t> v = {findLiteral(p,x,y,c), findLiteral(p,x,y+1,c)};
+                    std::vector<u_int16_t> v = {findNumberLiteral(x,y,c), findNumberLiteral(x,y+1,c)};
                     currColors.push_back(v);
                 }
                 for (auto product : products(currColors))
                 {
-                    cnf << -current->line[DOWN] << " ";
+                    cnf << -findLineLiteral(x,y,false) << " ";
                     commitLiterals(product, cnf, false, true);
                 }
             }  
@@ -163,8 +209,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
     // Add respective numbers to given number locations.
     for (size_t c = 1; c <= p.numPairs; c++)
     {
-        cnf << findLiteral(p,p.numberPairs.at(c-1).first.first, p.numberPairs.at(c-1).first.second,c) << " " << 0 << std::endl;
-        cnf << findLiteral(p,p.numberPairs.at(c-1).second.first, p.numberPairs.at(c-1).second.second,c) << " " << 0 << std::endl;
+        cnf << findNumberLiteral(p.numberPairs.at(c-1).first.first, p.numberPairs.at(c-1).first.second,c) << " " << 0 << std::endl;
+        cnf << findNumberLiteral(p.numberPairs.at(c-1).second.first, p.numberPairs.at(c-1).second.second,c) << " " << 0 << std::endl;
         nClauses += 2;
     }
 
@@ -172,17 +218,40 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
     file << cnf.str();
 } // generateCNF
 
-u_int16_t sat::findLiteral(ThePuzzle& p, u_int16_t x, u_int16_t y, u_int16_t c)
+u_int16_t sat::findNumberLiteral(u_int16_t x, u_int16_t y, u_int16_t c)
 {
-    for (auto tup : p.lit.c)
+    for (auto tup : lit.c)
         if (std::get<0>(tup) == x && std::get<1>(tup) == y && std::get<2>(tup) == c)
             return std::get<3>(tup);
     exit(EXIT_FAILURE);
 }
 
-std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getCoordinate(ThePuzzle& p, u_int16_t literal)
+u_int16_t sat::findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal)
 {
-    for (auto tup : p.lit.c)
+    // the line is horizontal
+    if (horizontal)
+    {
+        for (auto tup : lit.h)
+            if (std::get<0>(tup) == x && std::get<1>(tup) == y)
+                return std::get<2>(tup);
+        
+        exit(EXIT_FAILURE);
+    }
+
+    // the line is vertical
+    else
+    {
+        for (auto tup : lit.v)
+            if (std::get<0>(tup) == x && std::get<1>(tup) == y)
+                return std::get<2>(tup);
+        exit(EXIT_FAILURE); 
+    }
+
+}
+
+std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getCoordinate(u_int16_t literal)
+{
+    for (auto tup : lit.c)
         if (std::get<3>(tup) == literal)
             return std::make_tuple(std::get<0>(tup), std::get<1>(tup), std::get<2>(tup));
     exit(EXIT_FAILURE);

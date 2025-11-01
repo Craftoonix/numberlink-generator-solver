@@ -15,6 +15,28 @@ class sat
         u_int32_t nClauses;  // Amount of clauses needed
 
         /**
+         * @brief Blueprint of a struct containing all literals
+         * 
+         */
+        struct literals
+        {
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> v;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> h;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c;
+            u_int16_t totalLiterals;
+        } lit;
+
+        /**
+         * @brief Assigns literals for each combination of numbers per cell
+         * 
+         * @param width The width of the puzzle
+         * @param height The height of the puzzle puzzle
+         * @param nPairs The number of pairs in the puzzle
+         * @param p The puzzle
+         */
+        void assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, ThePuzzle & p);
+
+        /**
          * @brief Returns an iterator of tuples, each containing a unique combination of elements
          * 
          * @param elements Initial elements vector
@@ -80,13 +102,14 @@ class sat
         /**
          * @brief Looks up the literal given the x and y coordinate and their number
          * 
-         * @param p The puzzle
          * @param x The X coordinate
          * @param y The Y coordinate
          * @param c The number associated
          * @return The literal 
          */
-        u_int16_t findLiteral(ThePuzzle& p, u_int16_t x, u_int16_t y, u_int16_t c);
+        u_int16_t findNumberLiteral(u_int16_t x, u_int16_t y, u_int16_t c);
+
+        u_int16_t findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal);
         
         /**
          * @brief Decodes output.txt to visually see the solution
@@ -100,21 +123,10 @@ class sat
         /**
          * @brief Get coordinates and number from a given literal
          * 
-         * @param p The Puzzle
          * @param literal The given literal
          * @return A tuple containing the coordinates and number
          */
-        std::tuple<u_int16_t,u_int16_t,u_int16_t> getCoordinate(ThePuzzle& p, u_int16_t literal);
-        
-    public:
-        /**
-         * @brief Solves the puzzle using SAT
-         * 
-         * @param p The puzzle
-         * @param width The width of the puzzle
-         * @param height The height of the puzzle
-         */
-        void solve(ThePuzzle& p, u_int8_t width, u_int8_t height);
+        std::tuple<u_int16_t,u_int16_t,u_int16_t> getCoordinate(u_int16_t literal);
         
         /**
          * @brief Encodes the puzzle into CNF based on 
@@ -125,7 +137,16 @@ class sat
          * @param height The height of the puzzle
          */
         void generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height);
-};
 
+    public:
+        /**
+         * @brief Solves the puzzle using SAT
+         * 
+         * @param p The puzzle
+         * @param width The width of the puzzle
+         * @param height The height of the puzzle
+         */
+        void solve(ThePuzzle& p, u_int8_t width, u_int8_t height, u_int8_t nPairs);
+};
 
 #endif

@@ -1,11 +1,7 @@
 #include <iostream>
-#include <string>
-#include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <cstring>
 #include <unistd.h>
-#include "puzzle.h"
 #include "constants.h"
 #include "options.h"
 #include "sat.h"
@@ -53,7 +49,7 @@ int main (int argc, char* argv[]) {
     // after options, there should be width, height, and pairs
     if ((argc - optind + 2) % 4 != 0) {
         std::cout << "Usage: " << argv[0] 
-        << "<options> <width> <height> <coordinates of pairs>" << std::endl;
+        << " <options> <width> <height> <coordinates of pairs>" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -121,9 +117,8 @@ int main (int argc, char* argv[]) {
     else if (solverProgram == SAT)
     {
         sat SATsolver;
-        SATsolver.solve(numberlink,width,height);
+        SATsolver.solve(numberlink,width,height, numberPairs.size());
     }
-        //.generateCNF(numberlink, width, height);
 
     if (!numberlink.isSolved()) {
         std::cout << "No solution found.\n";
