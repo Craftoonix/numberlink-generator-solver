@@ -86,10 +86,12 @@ void ThePuzzle::createGrid()
             // Create a cell downwards
             Vconnector->adjacent[DOWN] = new Cell(x,y);
             Vconnector->lines[DOWN] = new Line();
+            Vconnector->lines[DOWN]->to[DOWN] = Vconnector->adjacent[DOWN];
 
             // Connect it with the cell upwards
             Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
             Vconnector->adjacent[DOWN]->lines[UP] = Vconnector->lines[DOWN];
+            Vconnector->adjacent[DOWN]->lines[UP]->to[UP] = Vconnector;
 
             // Move help pointers down
             Vconnector = Vconnector->adjacent[DOWN];
@@ -101,11 +103,13 @@ void ThePuzzle::createGrid()
             // Create a cell to the right
             Hconnector->adjacent[RIGHT] = new Cell(x,y);
             Hconnector->lines[RIGHT] = new Line();
+            Hconnector->lines[RIGHT]->to[RIGHT] = Hconnector->adjacent[RIGHT];
 
 
             // Connect it with the cell to the left
             Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
             Hconnector->adjacent[RIGHT]->lines[LEFT] = Hconnector->lines[RIGHT];
+            Hconnector->lines[RIGHT]->to[LEFT] = Hconnector;
 
             // Move helper pointer to the right
             Hconnector = Hconnector->adjacent[RIGHT];
@@ -120,6 +124,8 @@ void ThePuzzle::createGrid()
             HVconnector->adjacent[DOWN] = Hconnector;
             Hconnector->lines[UP] = new Line();
             HVconnector->lines[DOWN] = Hconnector->lines[UP];
+            Hconnector->lines[UP]->to[UP] = HVconnector;
+            Hconnector->lines[UP]->to[DOWN] = Hconnector;
         } // for x  
     } // for y
 } // ThePuzzle::createGrid
@@ -170,6 +176,8 @@ bool ThePuzzle::isSolved()
 Line::Line()
 {
     connected = false;
+    for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
+        to[dir] = nullptr;
 }
 
 Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)                                          
@@ -292,13 +300,4 @@ void dfs::solveWrapper(ThePuzzle& p)
           p.findCell(p.numberPairs.front().second.first,
                      p.numberPairs.front().second.second),
           p, 1);
-}
-
-void kruskal::solveWrapper(ThePuzzle& p)
-{
-    size_t numEdges = p.getNumEdges();
-    for (size_t i = 0; i < numEdges; i++) {
-        
-    }
-
 }
