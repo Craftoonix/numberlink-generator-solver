@@ -52,6 +52,7 @@ bool sat::decode(ThePuzzle &p)
     std::string line;
     std::stringstream literals;
     int literal;
+    Cell* curr;
 
     // get the first line to determine satisfiability
     getline(file,line);
@@ -66,13 +67,24 @@ bool sat::decode(ThePuzzle &p)
     while (literals >> literal)
     {
         // ignore negatives and end of line 0's
+        if (literal <= 0) continue;
+
+        // decode line literals
         if (literal <= static_cast<int>(p.getNumEdges()))
+        {
+            std::tuple<u_int16_t,u_int16_t,bool> coords;
+            coords = getLineCoordinate(literal);
+            curr = p.findCell(std::get<0>(coords),std::get<1>(coords));
+            if (std::get<2>(coords))
+                curr->lines[RIGHT]->connected = true;
+            else curr->lines[DOWN]->connected = true;
             continue;
+        }
         
-        // look up coordinate and number
+        // decode color literals
         std::tuple<u_int16_t,u_int16_t,u_int16_t> 
         tup = getCoordinate(literal);
-        Cell* curr = p.findCell(std::get<0>(tup),std::get<1>(tup));
+        curr = p.findCell(std::get<0>(tup),std::get<1>(tup));
 
         // assign the number to its cell
         curr->number = std::get<2>(tup);
@@ -251,6 +263,19 @@ std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getCoordinate(u_int16_t literal)
     for (auto tup : lit.c)
         if (std::get<3>(tup) == literal)
             return std::make_tuple(std::get<0>(tup), std::get<1>(tup), std::get<2>(tup));
+    exit(EXIT_FAILURE);
+}
+
+std::tuple<u_int16_t,u_int16_t,bool> sat::getLineCoordinate(u_int16_t literal)
+{
+    for (auto tup : lit.h)
+        if (std::get<2>(tup) == literal)
+            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),true);
+
+    for (auto tup : lit.v)
+        if (std::get<2>(tup) == literal)
+            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),false);
+
     exit(EXIT_FAILURE);
 }
 

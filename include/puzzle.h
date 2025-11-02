@@ -11,6 +11,13 @@
  */
 enum Direction {UP, RIGHT, DOWN, LEFT, NOP};
 
+class Line
+{
+    public:
+        Line();
+        bool connected;
+};
+
 
 /**
  * @brief The Cell class represents a cell in the puzzle
@@ -23,7 +30,7 @@ class Cell
         ~Cell() = default;
         Cell* adjacent[MAX_DIRECTIONS];      // up, right, down, left (The adjacent cells)
         Cell* checked[MAX_DIRECTIONS];       // used for backtracking
-        Direction path;                      // direction towards next cell which will form a path
+        Line* lines[MAX_DIRECTIONS];         // which lines are connected to the cell
 
         // Kruskal's algorithm members
         Cell* inPath;              // pointer to the cell where the path comes from
@@ -74,7 +81,7 @@ class ThePuzzle {
     private:
         u_int16_t width;   // and width
         u_int16_t height;  // actual height
-        
+
         /**
          * @brief Create the grid of the puzzle using linked lists
          * 

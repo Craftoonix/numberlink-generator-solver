@@ -121,12 +121,20 @@ class sat
         bool decode(ThePuzzle & p);
 
         /**
-         * @brief Get coordinates and number from a given literal
+         * @brief Get coordinates and number from a color literal
          * 
-         * @param literal The given literal
+         * @param literal The color literal
          * @return A tuple containing the coordinates and number
          */
         std::tuple<u_int16_t,u_int16_t,u_int16_t> getCoordinate(u_int16_t literal);
+
+        /**
+         * @brief Get coordinates from a line literal
+         * 
+         * @param literal The line literal
+         * @return A tuple containing the line coordinates and whether the line is vertical or horizontal
+         */
+        std::tuple<u_int16_t,u_int16_t,bool> getLineCoordinate(u_int16_t literal);
         
         /**
          * @brief Encodes the puzzle into CNF based on 

@@ -46,23 +46,27 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
 // destructor
 ThePuzzle::~ThePuzzle()
 {
-    // delete all cells
+    // delete all cells and liens
     Cell* Vdeletor = in;
     Cell* Hdeletor = Vdeletor->adjacent[RIGHT];
     for (size_t i = 0; i < height; i++) {
         if (i != 0) {
+            delete Vdeletor->lines[RIGHT];
             Vdeletor = Vdeletor->adjacent[DOWN];
             delete Vdeletor->adjacent[UP];
+            delete Vdeletor->lines[UP];
             Hdeletor = Vdeletor->adjacent[RIGHT];
         }
-        for (size_t j = 1; j < width; j++) {
-            if (j == 1) continue; // skip the first cell
+        for (size_t j = 2; j <= width; j++) {
+            if (Hdeletor->lines[UP] != nullptr)
+                delete Hdeletor->lines[UP];
             if (j == width) { // last cell in the row
                 delete Hdeletor;
                 continue;
             }
             Hdeletor = Hdeletor->adjacent[RIGHT];
             delete Hdeletor->adjacent[LEFT];
+            delete Hdeletor->lines[LEFT];
         }//for j  
     }//for i
     delete Vdeletor;
@@ -81,9 +85,11 @@ void ThePuzzle::createGrid()
 
             // Create a cell downwards
             Vconnector->adjacent[DOWN] = new Cell(x,y);
+            Vconnector->lines[DOWN] = new Line();
 
             // Connect it with the cell upwards
             Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
+            Vconnector->adjacent[DOWN]->lines[UP] = Vconnector->lines[DOWN];
 
             // Move help pointers down
             Vconnector = Vconnector->adjacent[DOWN];
@@ -94,9 +100,12 @@ void ThePuzzle::createGrid()
 
             // Create a cell to the right
             Hconnector->adjacent[RIGHT] = new Cell(x,y);
+            Hconnector->lines[RIGHT] = new Line();
+
 
             // Connect it with the cell to the left
             Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
+            Hconnector->adjacent[RIGHT]->lines[LEFT] = Hconnector->lines[RIGHT];
 
             // Move helper pointer to the right
             Hconnector = Hconnector->adjacent[RIGHT];
@@ -109,6 +118,8 @@ void ThePuzzle::createGrid()
             // Connect cells up and down with eachother
             Hconnector->adjacent[UP] = HVconnector;
             HVconnector->adjacent[DOWN] = Hconnector;
+            Hconnector->lines[UP] = new Line();
+            HVconnector->lines[DOWN] = Hconnector->lines[UP];
         } // for x  
     } // for y
 } // ThePuzzle::createGrid
@@ -122,8 +133,7 @@ void ThePuzzle::printPuzzle()
     for (size_t i = 0; i < height; i++)
     {
         for (size_t j = 0; j < width; j++) {
-            if ((i != 0 && Hprinter->adjacent[UP]->path == DOWN) 
-                        || Hprinter->path == UP)
+            if (i > 0 && Hprinter->lines[UP]->connected)
                 std::cout << "+X";
             else std::cout << "+-";
             Hprinter = Hprinter->adjacent[RIGHT];
@@ -131,8 +141,7 @@ void ThePuzzle::printPuzzle()
         Hprinter = Vprinter;
         std::cout << "+" << std::endl;
         for (size_t j = 0; j < width; j++) {
-            if ((j > 0 && Hprinter->adjacent[LEFT]->path == RIGHT) 
-                       || Hprinter->path == LEFT)
+            if (j > 0 && Hprinter->lines[LEFT]->connected)
                 std::cout << "X" << Hprinter->number;
             else std::cout << "|" << Hprinter->number;
             Hprinter = Hprinter->adjacent[RIGHT];
@@ -158,10 +167,16 @@ bool ThePuzzle::isSolved()
     return true; // no empty cells found
 }
 
+Line::Line()
+{
+    connected = false;
+}
+
 Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)                                          
 {
     for (size_t i = 0; i < MAX_DIRECTIONS; i++) {
         adjacent[i] = nullptr;
+        lines[i] = nullptr;
     }
     x = x_coord;
     y = y_coord;
@@ -169,7 +184,6 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
     inPath = nullptr;
     outPath = nullptr;
     isFixed = false;
-    path = Direction::NOP;
 }//Cell
 
 bool Cell::operator==(const Cell& other) const
@@ -224,7 +238,7 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
 
         if (*curr->adjacent[dir] == *otherPair) { // found my other half
             curr->number = otherPair->number;
-            curr->path = static_cast<Direction>(dir);
+            curr->lines[dir]->connected = true;
             
             if (p.isSolved())
                 return true; // puzzle is solved 
@@ -248,10 +262,10 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
             x2 = p.numberPairs.at(currPair - 1).second.first; 
             y2 = p.numberPairs.at(currPair - 1).second.second; 
             curr = prev;
+            curr->lines[dir]->connected = false;
             otherPair = p.findCell(x2, y2);
 
             continue; // check other directions
-            
         }
 
         if (curr->adjacent[dir]->number != 0)
@@ -259,15 +273,15 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
 
         // if the adjacent cell is empty, fill it with the current number
         curr->adjacent[dir]->number = curr->number;
-        curr->path = static_cast<Direction>(dir);
-        if (solve(curr->adjacent[dir], otherPair,p,currPair)) {
+    
+        curr->lines[dir]->connected = true;
+        if (solve(curr->adjacent[dir], otherPair,p,currPair))
             return true; // solution found
-        }
+        curr->lines[dir]->connected = false;
     }
     // backtrack
     if (!curr->isFixedCell())
         curr->number = 0;    
-    curr->path = Direction::NOP;
     return false; // no solution found
 }
 
