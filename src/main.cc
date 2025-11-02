@@ -50,6 +50,15 @@ int main (int argc, char* argv[]) {
     if ((argc - optind + 2) % 4 != 0) {
         std::cout << "Usage: " << argv[0] 
         << " <options> <width> <height> <coordinates of pairs>" << std::endl;
+        std::cout << "example: " << argv[0] << "-i -s sat 4 4 0 0 3 3 3 0 3 1 1 2 2 3 3 2" << std::endl;
+        std::cout << "This will show the initial puzzle first and then solve it using SAT" << std::endl;
+        std::cout << "This puzzle is a 4x4 puzzle with the following number pairs:" << std::endl;
+        std::cout << "1: on coordinates (0.0) and (3.3)" << std::endl;
+        std::cout << "2: on coordinates (3.0) and (3.1)" << std::endl;
+        std::cout << "3: on coordinates (1.2) and (3.2)" << std::endl;
+        std::cout << "The coordinates are formed as (x,y)" << std::endl;
+        std::cout << "The x coordinate represents the row the number is in and increases every row to the right" << std::endl;
+        std::cout << "The y coordinate represents the collumn the number is in and increases every collumn downwards" << std::endl;
         return EXIT_FAILURE;
     }
 
