@@ -121,21 +121,27 @@ void ThePuzzle::printPuzzle()
 
     for (size_t i = 0; i < height; i++)
     {
-        std::cout << "+-";
-        for (size_t j = 1; j < width; j++) {
-            std::cout << "+-";
+        for (size_t j = 0; j < width; j++) {
+            if ((i != 0 && Hprinter->adjacent[UP]->path == DOWN) 
+                        || Hprinter->path == UP)
+                std::cout << "+X";
+            else std::cout << "+-";
+            Hprinter = Hprinter->adjacent[RIGHT];
         }
+        Hprinter = Vprinter;
         std::cout << "+" << std::endl;
         for (size_t j = 0; j < width; j++) {
-            std::cout << "|" << Hprinter->number;
+            if ((j > 0 && Hprinter->adjacent[LEFT]->path == RIGHT) 
+                       || Hprinter->path == LEFT)
+                std::cout << "X" << Hprinter->number;
+            else std::cout << "|" << Hprinter->number;
             Hprinter = Hprinter->adjacent[RIGHT];
         }
         std::cout << "|" << std::endl;
         Vprinter = Vprinter->adjacent[DOWN];
         Hprinter = Vprinter;
     }
-    std::cout << "+-";
-    for (size_t j = 1; j < width; j++) {
+    for (size_t j = 0; j < width; j++) {
         std::cout << "+-";
     }
     std::cout << "+" << std::endl;
@@ -163,6 +169,7 @@ Cell::Cell(u_int16_t x_coord, u_int16_t y_coord)
     inPath = nullptr;
     outPath = nullptr;
     isFixed = false;
+    path = Direction::NOP;
 }//Cell
 
 bool Cell::operator==(const Cell& other) const
@@ -217,6 +224,7 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
 
         if (*curr->adjacent[dir] == *otherPair) { // found my other half
             curr->number = otherPair->number;
+            curr->path = static_cast<Direction>(dir);
             
             if (p.isSolved())
                 return true; // puzzle is solved 
@@ -251,6 +259,7 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
 
         // if the adjacent cell is empty, fill it with the current number
         curr->adjacent[dir]->number = curr->number;
+        curr->path = static_cast<Direction>(dir);
         if (solve(curr->adjacent[dir], otherPair,p,currPair)) {
             return true; // solution found
         }
@@ -258,6 +267,7 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
     // backtrack
     if (!curr->isFixedCell())
         curr->number = 0;    
+    curr->path = Direction::NOP;
     return false; // no solution found
 }
 

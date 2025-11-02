@@ -9,7 +9,7 @@
  * @brief Cardinal Directions of a cell
  * 
  */
-enum Direction {UP, RIGHT, DOWN, LEFT};
+enum Direction {UP, RIGHT, DOWN, LEFT, NOP};
 
 
 /**
@@ -23,6 +23,7 @@ class Cell
         ~Cell() = default;
         Cell* adjacent[MAX_DIRECTIONS];      // up, right, down, left (The adjacent cells)
         Cell* checked[MAX_DIRECTIONS];       // used for backtracking
+        Direction path;                      // direction towards next cell which will form a path
 
         // Kruskal's algorithm members
         Cell* inPath;              // pointer to the cell where the path comes from
@@ -73,20 +74,20 @@ class ThePuzzle {
     private:
         u_int16_t width;   // and width
         u_int16_t height;  // actual height
-
+        
         /**
          * @brief Create the grid of the puzzle using linked lists
          * 
          */
         void createGrid();
         
-        public:
+    public:
+        u_int16_t numPairs; // number of pairs of numbers
         ThePuzzle(u_int16_t w, u_int16_t h, 
             std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
             std::pair<u_int16_t,u_int16_t>>> n);
         ~ThePuzzle ();
             
-        u_int16_t numPairs; // number of pairs of numbers
         /**
          * @brief Prints the puzzle to the console
          * 
@@ -133,11 +134,7 @@ class ThePuzzle {
         std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
             std::pair<u_int16_t,u_int16_t>>> numberPairs; // vector of pairs of coordinates of numbers
         
-        Cell* in;      // pointer to the first cell of the puzzle
-
-        
-
-        
+        Cell* in;      // pointer to the first cell of the puzzle   
 };//ThePuzzle
 
 class solver
@@ -177,4 +174,4 @@ class kruskal : public solver
         bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;
         void solveWrapper(ThePuzzle& p) override;
 };
-#endif // PUZZLE_H
+#endif // PUZZLE_H;

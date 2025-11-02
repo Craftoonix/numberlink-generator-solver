@@ -17,14 +17,12 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
             if (assigner->adjacent[UP] != nullptr) {
                 litNumber++;
                 lit.v.push_back(std::make_tuple(assigner->x,assigner->y-1,litNumber));
-                //std::cout<< assigner->x << " " << assigner->y-1 << " " << litNumber << "y"<< std::endl;
             }
 
             if (assigner->adjacent[RIGHT] != nullptr)
             {
                 litNumber++;
                 lit.h.push_back(std::make_tuple(assigner->x,assigner->y,litNumber));
-                //std::cout<< assigner->x << " " << assigner->y << " " << litNumber << "y" <<std::endl;
             }
             assigner = assigner->adjacent[RIGHT];
         }
@@ -34,7 +32,6 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
     
 
     // Assign color literals
-    // u_int16_t totalLines = p.getNumEdges();
     lit.totalLiterals = litNumber;
     for (u_int16_t y = 0; y < height ; y++)
     {
