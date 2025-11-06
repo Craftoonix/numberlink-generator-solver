@@ -5,14 +5,7 @@
 #include "cell.h"
 #include <vector>
 #include <utility>
-
-class Line
-{
-    public:
-        Line();
-        bool connected;
-        Cell* to[MAX_DIRECTIONS];
-};
+#include <memory>
     
 /**
  * @brief Class which contains all data about the puzzle

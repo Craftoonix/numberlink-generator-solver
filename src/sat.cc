@@ -1,6 +1,4 @@
 #include "sat.h"
-#include <iostream>
-
 
 void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, ThePuzzle & p)
 {

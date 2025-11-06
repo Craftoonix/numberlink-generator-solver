@@ -1,8 +1,23 @@
 #ifndef CELL_H
 #define CELL_H
 
+#include "constants.h"
 #include <string>
-#include "puzzle.h"
+#include <memory>
+
+class Cell;
+
+/**
+ * @brief The lines of the puzzle
+ * 
+ */
+class Line
+{
+    public:
+        Line();
+        bool connected;
+        Cell* to[MAX_DIRECTIONS];
+};
 
 /**
  * @brief Cardinal Directions of a cell

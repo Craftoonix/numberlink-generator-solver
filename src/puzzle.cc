@@ -105,7 +105,6 @@ void ThePuzzle::createGrid()
             Hconnector->lines[RIGHT] = new Line();
             Hconnector->lines[RIGHT]->to[RIGHT] = Hconnector->adjacent[RIGHT];
 
-
             // Connect it with the cell to the left
             Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
             Hconnector->adjacent[RIGHT]->lines[LEFT] = Hconnector->lines[RIGHT];
@@ -197,17 +196,17 @@ Cell* ThePuzzle::findCell(u_int16_t x_coord, u_int16_t y_coord)
     return finder; // return the found cell
 }
 
-void ThePuzzle::switchFinder(u_int16_t toNumber, Cell& start, Cell& end) {
-    toNumber--;
-    std::cout << toNumber + 1 << "\n";
+// void ThePuzzle::switchFinder(u_int16_t toNumber, Cell& start, Cell& end) {
+//     toNumber--;
+//     std::cout << toNumber + 1 << "\n";
     
-    u_int16_t x1 = numberPairs.at(toNumber).first.first; 
-    u_int16_t y1 = numberPairs.at(toNumber).first.second; 
-    u_int16_t x2 = numberPairs.at(toNumber).second.first; 
-    u_int16_t y2 = numberPairs.at(toNumber).second.second; 
-    start = *findCell(x1, y1);
-    end = *findCell(x2, y2);
-}
+//     u_int16_t x1 = numberPairs.at(toNumber).first.first; 
+//     u_int16_t y1 = numberPairs.at(toNumber).first.second; 
+//     u_int16_t x2 = numberPairs.at(toNumber).second.first; 
+//     u_int16_t y2 = numberPairs.at(toNumber).second.second; 
+//     start = *findCell(x1, y1);
+//     end = *findCell(x2, y2);
+// }
 
 bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
 {
