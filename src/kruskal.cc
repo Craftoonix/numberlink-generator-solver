@@ -76,6 +76,7 @@ bool kruskal::isAvailable(Line* curr, size_t dir)
     size_t connectedLines = 0;
     for (size_t i = 0; i < MAX_DIRECTIONS; i++)
     {   
+        // check if the adjacent cell is connected
         if (curr->to[dir]->adjacent[i])  
             connectedLines++;  
     }

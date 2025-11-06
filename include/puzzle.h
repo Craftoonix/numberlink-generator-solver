@@ -13,14 +13,14 @@
  */
 class ThePuzzle {
     private:
-    u_int16_t width;   // and width
-    u_int16_t height;  // actual height
-    
-    /**
-     * @brief Create the grid of the puzzle using linked lists
-     * 
-     */
-    void createGrid();
+        u_int16_t width;   // and width
+        u_int16_t height;  // actual height
+        
+        /**
+         * @brief Create the grid of the puzzle using linked lists
+         * 
+         */
+        void createGrid();
     
     public:
         u_int16_t numPairs; // number of pairs of numbers
@@ -78,17 +78,9 @@ class ThePuzzle {
         Cell* in;      // pointer to the first cell of the puzzle   
 };//ThePuzzle
 
-class solver
+class dfs
 {
-    public:
-        virtual bool solve(Cell* curr, Cell* otherPair, 
-                            ThePuzzle &p, u_int16_t currPair) = 0;
-        virtual void solveWrapper(ThePuzzle& p) = 0;
-};
-
-class dfs : public solver
-{
-    public:
+    private:
         /**
          * @brief Will recursively solve the puzzle using DFS from the current cell;
          * 
@@ -99,13 +91,13 @@ class dfs : public solver
          * @return true 
          * @return false 
          */
-        bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair) override;
-        
+        bool solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair);
+    public:
         /**
          * @brief Wrapper function of the solver
          * 
          * @param p The puzzle
          */
-        void solveWrapper(ThePuzzle& p) override;
+        void solveWrapper(ThePuzzle& p);
 };
 #endif // PUZZLE_H;

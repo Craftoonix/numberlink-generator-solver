@@ -8,14 +8,29 @@
 class kruskal
 {
     private:
-        std::vector<Line*> randomizedLines; 
+        std::vector<Line*> randomizedLines;         // the vector of lines in randomized order
+        std::vector<std::vector<Line*>> usedLines;  // the used lines
+        std::vector<Line*> enabledLines;            // the lines that are added
+
+        /**
+         * @brief check if the proposed line can be added in the proposed direction
+         * 
+         * @param curr the proposed line
+         * @param dir the proposed direction
+         * @return true the line is available
+         * @return false the line is not available
+         */
         bool isAvailable(Line* curr, size_t dir);
-        std::vector<std::vector<Line*>> usedLines;
-        std::vector<Line*> enabledLines;
+
+        /**
+         * @brief randomized the lines in randomizedLines
+         * 
+         * @param p the puzzle in which the lines are in
+         */
+        void randomizeEdges(ThePuzzle p);
     public:
         kruskal();
         ~kruskal();
-        void randomizeEdges(ThePuzzle p);
         void solve(ThePuzzle p);
 };
 
