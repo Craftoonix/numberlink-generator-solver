@@ -20,9 +20,12 @@ class sat
          */
         struct literals
         {
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> v;
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> h;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vl;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hl;
             std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vb;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hb;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> r;
             u_int16_t totalLiterals;
         } lit;
 
@@ -100,7 +103,7 @@ class sat
         void commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign, bool unsign);
         
         /**
-         * @brief Looks up the literal given the x and y coordinate and their number
+         * @brief Looks up the number literal given the x and y coordinate and their number
          * 
          * @param x The X coordinate
          * @param y The Y coordinate
@@ -109,7 +112,24 @@ class sat
          */
         u_int16_t findNumberLiteral(u_int16_t x, u_int16_t y, u_int16_t c);
 
+        /**
+         * @brief Looks up the line literal given the x and y coordinate and direction
+         * 
+         * @param x The x coordinate
+         * @param y The y coordinate
+         * @param horizontal True: look up horizontal line, False: look up vertical line
+         * @return The literal
+         */
         u_int16_t findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal);
+
+        /**
+         * @brief Looks up the vertex literal given the x and y coordinate
+         * 
+         * @param x The x coordinate
+         * @param y The y coordinate
+         * @return The literal
+         */
+        u_int16_t findVertexLiteral(u_int16_t x, u_int16_t y);
         
         /**
          * @brief Decodes output.txt to visually see the solution

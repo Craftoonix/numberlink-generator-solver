@@ -5,7 +5,7 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
     // assign line literals
     Cell* assigner, *Vconnector;
     assigner = Vconnector = p.in;
-    u_int16_t litNumber = 0;
+    lit.totalLiterals = 0;
 
     while (Vconnector != nullptr)
     {
@@ -13,14 +13,18 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
         {
 
             if (assigner->adjacent[UP] != nullptr) {
-                litNumber++;
-                lit.v.push_back(std::make_tuple(assigner->x,assigner->y-1,litNumber));
+                lit.totalLiterals++;
+                lit.vl.push_back(std::make_tuple(assigner->x,assigner->y-1,lit.totalLiterals));
+                // lit.totalLiterals++;
+                // lit.vb.push_back(std::make_tuple(assigner->x,assigner->y-1,lit.totalLiterals));
             }
 
             if (assigner->adjacent[RIGHT] != nullptr)
             {
-                litNumber++;
-                lit.h.push_back(std::make_tuple(assigner->x,assigner->y,litNumber));
+                lit.totalLiterals++;
+                lit.hl.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals));
+                // lit.totalLiterals++;
+                // lit.hb.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals));
             }
             assigner = assigner->adjacent[RIGHT];
         }
@@ -30,7 +34,6 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
     
 
     // Assign color literals
-    lit.totalLiterals = litNumber;
     for (u_int16_t y = 0; y < height ; y++)
     {
         for (u_int16_t x = 0; x < width; x++)
@@ -42,6 +45,36 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
             }
         }
     }  
+
+    // assign border literals
+    // for  (u_int16_t y = 0; y < height; y++)
+    // {
+    //     for (u_int16_t x = 0; x <= width; x++)
+    //     {
+    //         lit.totalLiterals++;
+    //         lit.vb.push_back(std::make_tuple(x,y,lit.totalLiterals));
+    //     }
+    // }
+    // for  (u_int16_t y = 0; y <= height; y++)
+    // {
+    //     for (u_int16_t x = 0; x < width; x++)
+    //     {
+    //         lit.totalLiterals++;
+    //         lit.hb.push_back(std::make_tuple(x,y,lit.totalLiterals));
+    //     }
+    // }
+
+    // assign vertex literals
+    for (u_int16_t y = 1; y < height; y++)
+    {
+        for (u_int16_t x = 1; x <= width; x++)
+        {
+            lit.totalLiterals++;
+            // every left upper corner of each cell 
+            // meaning that every vertex at the border will be skipped
+            lit.r.push_back(std::make_tuple(x,y,lit.totalLiterals));
+        }
+    }
 }
 
 bool sat::decode(ThePuzzle &p)
@@ -110,7 +143,22 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
     std::ofstream file("numberlink.cnf");
     std::ostringstream cnf;
     if (!file.is_open()){
-        return;
+        return;    // for  (u_int16_t y = 0; y < height; y++)
+    // {
+    //     for (u_int16_t x = 0; x <= width; x++)
+    //     {
+    //         lit.totalLiterals++;
+    //         lit.vb.push_back(std::make_tuple(x,y,lit.totalLiterals));
+    //     }
+    // }
+    // for  (u_int16_t y = 0; y <= height; y++)
+    // {
+    //     for (u_int16_t x = 0; x < width; x++)
+    //     {
+    //         lit.totalLiterals++;
+    //         lit.hb.push_back(std::make_tuple(x,y,lit.totalLiterals));
+    //     }
+    // }
     }
     
     // go through each cell
@@ -210,6 +258,22 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                     commitLiterals(product, cnf, false, true);
                 }
             }  
+
+            if (x == 0 || y == 0) continue;
+
+            // prevent 2x2 cycles
+            cnf << -findLineLiteral(x,y-1,VERTICAL) << " ";
+            cnf << -findLineLiteral(x-1,y,HORIZONTOAL) << " ";
+            cnf << -findLineLiteral(x-1,y-1,VERTICAL) << " ";
+            cnf << -findLineLiteral(x-1,y-1,HORIZONTOAL) << " ";
+            cnf << 0 << std::endl;
+            
+            // u_int16_t vertex = findVertexLiteral(x,y);
+            // if (vertex > 0) {
+            //     if
+            //     cnf << vertex << " ";
+            // }
+
         } // for j
     } // for i
 
@@ -238,7 +302,7 @@ u_int16_t sat::findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal)
     // the line is horizontal
     if (horizontal)
     {
-        for (auto tup : lit.h)
+        for (auto tup : lit.hl)
             if (std::get<0>(tup) == x && std::get<1>(tup) == y)
                 return std::get<2>(tup);
         
@@ -248,12 +312,21 @@ u_int16_t sat::findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal)
     // the line is vertical
     else
     {
-        for (auto tup : lit.v)
+        for (auto tup : lit.vl)
             if (std::get<0>(tup) == x && std::get<1>(tup) == y)
                 return std::get<2>(tup);
         exit(EXIT_FAILURE); 
     }
 
+}
+
+u_int16_t sat::findVertexLiteral(u_int16_t x, u_int16_t y)
+{
+    for (auto tup : lit.r)
+        if (std::get<0>(tup) == x && std::get<1>(tup) == y)
+            return std::get<2>(tup);
+    
+    return 0;
 }
 
 std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getCoordinate(u_int16_t literal)
@@ -266,11 +339,11 @@ std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getCoordinate(u_int16_t literal)
 
 std::tuple<u_int16_t,u_int16_t,bool> sat::getLineCoordinate(u_int16_t literal)
 {
-    for (auto tup : lit.h)
+    for (auto tup : lit.hl)
         if (std::get<2>(tup) == literal)
             return std::make_tuple(std::get<0>(tup),std::get<1>(tup),true);
 
-    for (auto tup : lit.v)
+    for (auto tup : lit.vl)
         if (std::get<2>(tup) == literal)
             return std::make_tuple(std::get<0>(tup),std::get<1>(tup),false);
 
