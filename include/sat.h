@@ -11,7 +11,6 @@
 class sat
 {
     private:
-        u_int16_t nLiterals; // Amount of literals needed
         u_int32_t nClauses;  // Amount of clauses needed
 
         /**
@@ -20,12 +19,13 @@ class sat
          */
         struct literals
         {
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vl;
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hl;
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c;
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vb;
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hb;
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> r;
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vl;          // (x,y.literal)
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hl;          // (x,y,literal)
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c; // (x,y,number,literal)
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vb;          
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hb;  
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> r;           // (x',y',literal)
+            std::vector<std::tuple<u_int16_t,Direction,u_int16_t>> rd;          // (Vliteral, Direction, literal)
             u_int16_t totalLiterals;
         } lit;
 
@@ -68,10 +68,9 @@ class sat
          * @param r The length of each combination
          * @param cnf The stringstream needed to dump the combinations in
          * @param sign Are the literals signed
-         * @param unsign Are the literals not signed
          * @return * void 
          */
-        void doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ostringstream & cnf, bool sign, bool unsign);
+        void doCombinations(std::vector<u_int16_t> v, u_int16_t r, std::ostringstream & cnf, bool sign);
 
         /**
          * @brief Returns a vector each containing one element from each of the input vectors
@@ -93,14 +92,23 @@ class sat
                     std::vector<u_int16_t>& current, std::vector<std::vector<u_int16_t>> &result);
         
         /**
+         * @brief Stream a single literal to cnf
+         * 
+         * @param literal the literal to be streamed
+         * @param cnf osstringstream to sream to
+         * @param sign whether the literal is signed
+         * @return * void 
+         */
+        void commitLiteral(u_int16_t literal, std::ostringstream & cnf, bool sign);
+        
+        /**
          * @brief Will stream the literals in v to cnf
          * 
          * @param v The vector containing the literals
          * @param cnf The ostringstream needed to contain the literals 
-         * @param sign Are the literals signed
-         * @param unsign Are the literals not signed
+         * @param sign Are the literals signed or unsigned
          */
-        void commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign, bool unsign);
+        void commitLiterals(std::vector<u_int16_t> v, std::ostringstream & cnf, bool sign);
         
         /**
          * @brief Looks up the number literal given the x and y coordinate and their number
@@ -121,6 +129,15 @@ class sat
          * @return The literal
          */
         u_int16_t findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal);
+
+        /**
+         * @brief Looks up the directional vertex literal given the vertex literal and direction
+         * 
+         * @param Vlit The vertex literal
+         * @param dir The direction
+         * @return the literal
+         */
+        u_int16_t findVertexDirLiteral(u_int16_t Vlit, Direction dir);
 
         /**
          * @brief Looks up the vertex literal given the x and y coordinate
@@ -155,6 +172,8 @@ class sat
          * @return A tuple containing the line coordinates and whether the line is vertical or horizontal
          */
         std::tuple<u_int16_t,u_int16_t,bool> getLineCoordinate(u_int16_t literal);
+
+        std::tuple<u_int16_t,u_int16_t,u_int16_t> getVertexLiteral(u_int16_t literal);
         
         /**
          * @brief Encodes the puzzle into CNF based on 
