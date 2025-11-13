@@ -11,22 +11,70 @@ enum solverPrograms
 {
     DFS = 1,
     SAT = 2,
-};
+} solverProgram;
+
+void showUsage(std::string programName)
+{
+    std::cout << "Usage: " << programName
+    << " <options> <width> <height> <coordinates of pairs>" << std::endl;
+    std::cout << "example: " << programName << "-i -s sat 4 4 0 0 3 3 3 0 3 1 1 2 2 3 3 2" << std::endl;
+    std::cout << "This will show the initial puzzle first and then solve it using SAT" << std::endl;
+    std::cout << "This puzzle is a 4x4 puzzle with the following number pairs:" << std::endl;
+    std::cout << "1: on coordinates (0.0) and (3.3)" << std::endl;
+    std::cout << "2: on coordinates (3.0) and (3.1)" << std::endl;
+    std::cout << "3: on coordinates (1.2) and (3.2)" << std::endl;
+    std::cout << "The coordinates are formed as (x,y)" << std::endl;
+    std::cout << "The x coordinate represents the row the number is in and increases every row to the right" << std::endl;
+    std::cout << "The y coordinate represents the collumn the number is in and increases every collumn downwards" << std::endl;
+}
+
+bool parseInputFile(int & nArgs, u_int16_t args[])
+{
+    std::ifstream file(INPUT_FILE);
+    std::string line;
+    std::stringstream coords;
+    u_int16_t coord = 0;
+    u_int16_t counter = 0;
+
+
+    if(!file.is_open()) {
+        std::cerr << "ERROR: Input file not found\n";
+        return EXIT_FAILURE;
+    }
+
+    // gather all lines from input file
+    while (getline(file,line))
+        coords << line;   
+    file.close();
+
+    // parse line to form coordinates
+    while (coords >> coord)
+    {
+        args[counter] = coord;
+        counter++;
+    }
+    nArgs = counter;
+    return 0;
+}
 
 
 // main program
 int main (int argc, char* argv[]) {
     int opt;
-    u_int8_t solverProgram = 0;
+    int nArgs = argc;
+    int width, height;
+    int x1, x2, y1, y2;
+    u_int16_t args[MAX_CELLS * MAX_CELLS];
+
+
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:i")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:io:")) != -1) 
     {
         switch (opt)
         {
         case 's':
             // solve the puzzle
             SOLVE_PUZZLE = true;
-            //std::string arg(optarg);
             if (strcmp(optarg, "dfs") == 0) 
                 solverProgram = DFS;
             else if (strcmp(optarg, "sat") == 0)
@@ -40,6 +88,12 @@ int main (int argc, char* argv[]) {
             // show the initial puzzle
             SHOW_INITIAL_PUZZLE = true;
             break;
+        case 'o':
+            INPUT_FILE = optarg;
+            USE_INPUT_FILE = true;
+            //optind = 0;
+            if (parseInputFile(nArgs, args)) return EXIT_FAILURE;
+            break;
         
         case '?':
             std::cerr << "Unknown option: " << char(optopt) << std::endl;
@@ -47,23 +101,21 @@ int main (int argc, char* argv[]) {
     }
 
     // after options, there should be width, height, and pairs
-    if ((argc - optind + 2) % 4 != 0) {
-        std::cout << "Usage: " << argv[0] 
-        << " <options> <width> <height> <coordinates of pairs>" << std::endl;
-        std::cout << "example: " << argv[0] << "-i -s sat 4 4 0 0 3 3 3 0 3 1 1 2 2 3 3 2" << std::endl;
-        std::cout << "This will show the initial puzzle first and then solve it using SAT" << std::endl;
-        std::cout << "This puzzle is a 4x4 puzzle with the following number pairs:" << std::endl;
-        std::cout << "1: on coordinates (0.0) and (3.3)" << std::endl;
-        std::cout << "2: on coordinates (3.0) and (3.1)" << std::endl;
-        std::cout << "3: on coordinates (1.2) and (3.2)" << std::endl;
-        std::cout << "The coordinates are formed as (x,y)" << std::endl;
-        std::cout << "The x coordinate represents the row the number is in and increases every row to the right" << std::endl;
-        std::cout << "The y coordinate represents the collumn the number is in and increases every collumn downwards" << std::endl;
-        return EXIT_FAILURE;
+    if (!USE_INPUT_FILE) {
+        if ((argc - optind + 2) % 4 != 0) {
+            showUsage(argv[0]);
+            return EXIT_FAILURE;
+        }
+    }
+    else {
+        if ((nArgs + 2) % 4 !=0) {
+            showUsage(argv[0]);
+            return EXIT_FAILURE;
+        } 
     }
 
-    int width = atoi(argv[optind]);
-    int height = atoi(argv[optind + 1]);
+    width = (USE_INPUT_FILE) ? args[0] : atoi(argv[optind]);
+    height = (USE_INPUT_FILE) ? args[1] : atoi(argv[optind + 1]) ;
     if (width <= 0 || height <= 0) {
         std::cerr << "Error: width & height must be positive integers" << std::endl;
         return EXIT_FAILURE;
@@ -76,12 +128,13 @@ int main (int argc, char* argv[]) {
     //create vector of pairs of coordinates of numbers
     std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
                            std::pair<u_int16_t,u_int16_t>>> numberPairs;
-    for (int i = optind + 2; i < argc; i = i + 4)
+    for (int i = (USE_INPUT_FILE) ? 2 : optind + 2; i < nArgs; i = i + 4)
     {
-        int x1 = atoi(argv[i + 0]);
-        int y1 = atoi(argv[i + 1]);
-        int x2 = atoi(argv[i + 2]);
-        int y2 = atoi(argv[i + 3]);
+        x1 = (USE_INPUT_FILE) ? args[i + 0] : atoi(argv[i + 0]);      
+        y1 = (USE_INPUT_FILE) ? args[i + 1] : atoi(argv[i + 1]); 
+        x2 = (USE_INPUT_FILE) ? args[i + 2] : atoi(argv[i + 2]); 
+        y2 = (USE_INPUT_FILE) ? args[i + 3] : atoi(argv[i + 3]); 
+
         if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
             x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
         std::cerr << "Error: coordinates must be within the grid" << std::endl;
