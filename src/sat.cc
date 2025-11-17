@@ -320,6 +320,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             //     nClauses++;
             // }
             // line literal is true OR corresponding vertex directional literal is true
+
+            
             u_int16_t vertexLiteral = findVertexLiteral(x,y);
             std::vector<u_int16_t> VertexDirLiterals;
 
@@ -327,17 +329,11 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             if (x > 0 && x < width && y > 0 && y < height) {
                 for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
                     VertexDirLiterals.push_back(findVertexDirLiteral(vertexLiteral,static_cast<Direction>(dir)));
-                //doCombinations(VertexDirLiterals,2,cnf,SIGNED);
+                doCombinations(VertexDirLiterals,2,cnf,SIGNED);
                 commitLiterals(VertexDirLiterals,cnf,UNSIGNED);
-                //for (auto v : VertexDirLiterals)
-                    //std::cout << v << std::endl;
             }
-            //std::cout << std::endl;
-
-            
 
             // only 1 vertex directional literal can be true per line and cant cross the connected line
-
             std::vector<u_int16_t> possibleLines;
             if (x != width && x != 0 && y != 0)
             {
@@ -345,7 +341,6 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                 possibleLines.push_back(findVertexDirLiteral(vertexLiteral,UP));
                 possibleLines.push_back(findVertexDirLiteral(findVertexLiteral(x,y-1),DOWN));
                 doCombinations(possibleLines,2,cnf,SIGNED);
-                commitLiterals(possibleLines,cnf,UNSIGNED);
             }
 
             if (y != height && y != 0 && x != 0)
@@ -355,24 +350,7 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                 possibleLines.push_back(findVertexDirLiteral(vertexLiteral,LEFT));
                 possibleLines.push_back(findVertexDirLiteral(findVertexLiteral(x-1,y),RIGHT));
                 doCombinations(possibleLines,2,cnf,SIGNED);
-                commitLiterals(possibleLines,cnf,UNSIGNED);
             }
-
-
-            // // prevent 2x2 cycles
-            // cnf << -findLineLiteral(x,y-1,VERTICAL) << " ";
-            // cnf << -findLineLiteral(x-1,y,HORIZONTOAL) << " ";
-            // cnf << -findLineLiteral(x-1,y-1,VERTICAL) << " ";
-            // cnf << -findLineLiteral(x-1,y-1,HORIZONTOAL) << " ";
-            // cnf << 0 << std::endl;
-            // nClauses++;
-            
-            // u_int16_t vertex = findVertexLiteral(x,y);
-            // if (vertex > 0) {
-            //     if
-            //     cnf << vertex << " ";
-            // }
-
         }
     }
     file << "p cnf " << lit.totalLiterals-1 << " " << nClauses << std::endl;

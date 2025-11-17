@@ -68,7 +68,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:io:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:if:")) != -1) 
     {
         switch (opt)
         {
@@ -88,7 +88,7 @@ int main (int argc, char* argv[]) {
             // show the initial puzzle
             SHOW_INITIAL_PUZZLE = true;
             break;
-        case 'o':
+        case 'f':
             INPUT_FILE = optarg;
             USE_INPUT_FILE = true;
             //optind = 0;
