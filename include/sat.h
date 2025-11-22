@@ -194,6 +194,8 @@ class sat
          * @param height The height of the puzzle
          */
         void solve(ThePuzzle& p, u_int8_t width, u_int8_t height, u_int8_t nPairs);
+
+        void generate();
 };
 
 #endif

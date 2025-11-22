@@ -6,11 +6,15 @@
 #include "options.h"
 #include "sat.h"
 
+enum genPrograms
+{
+    SAT,
+} genProgram;
 
 enum solverPrograms
 {
-    DFS = 1,
-    SAT = 2,
+    DFS,
+    SAT,
 } solverProgram;
 
 void showUsage(std::string programName)
@@ -65,6 +69,9 @@ int main (int argc, char* argv[]) {
     int width, height;
     int x1, x2, y1, y2;
     u_int16_t args[MAX_CELLS * MAX_CELLS];
+    //create vector of pairs of coordinates of numbers
+    std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                            std::pair<u_int16_t,u_int16_t>>> numberPairs;
 
 
     // parse command line options
@@ -76,9 +83,9 @@ int main (int argc, char* argv[]) {
             // solve the puzzle
             SOLVE_PUZZLE = true;
             if (strcmp(optarg, "dfs") == 0) 
-                solverProgram = DFS;
+                solverProgram = solverPrograms::DFS;
             else if (strcmp(optarg, "sat") == 0)
-                solverProgram = SAT;
+                solverProgram = solverPrograms::SAT;
             else {
                 std::cerr << "Error: unknown solving method '" << optarg << "'\n";
                 return EXIT_FAILURE;
@@ -94,7 +101,15 @@ int main (int argc, char* argv[]) {
             //optind = 0;
             if (parseInputFile(nArgs, args)) return EXIT_FAILURE;
             break;
-        
+        case 'g':
+            // generate a puzzle
+            GENERATE_PUZZLE = true;
+            if (strcmp(optarg, "sat") == 0 )
+                genProgram = genPrograms::SAT;
+            else {
+                std::cerr << "Error: unknown generator method '" << optarg << "'\n";
+                return EXIT_FAILURE;
+            }
         case '?':
             std::cerr << "Unknown option: " << char(optopt) << std::endl;
         }
@@ -125,42 +140,51 @@ int main (int argc, char* argv[]) {
         return EXIT_FAILURE; 
     }
 
-    //create vector of pairs of coordinates of numbers
-    std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
-                           std::pair<u_int16_t,u_int16_t>>> numberPairs;
-    for (int i = (USE_INPUT_FILE) ? 2 : optind + 2; i < nArgs; i = i + 4)
-    {
-        x1 = (USE_INPUT_FILE) ? args[i + 0] : atoi(argv[i + 0]);      
-        y1 = (USE_INPUT_FILE) ? args[i + 1] : atoi(argv[i + 1]); 
-        x2 = (USE_INPUT_FILE) ? args[i + 2] : atoi(argv[i + 2]); 
-        y2 = (USE_INPUT_FILE) ? args[i + 3] : atoi(argv[i + 3]); 
-
-        if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
-            x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
-        std::cerr << "Error: coordinates must be within the grid" << std::endl;
-        return EXIT_FAILURE; 
+    if (GENERATE_PUZZLE){
+        switch (genProgram)
+        {
+        case genPrograms::SAT:
+            
+            break;
+        
         }
-        // pairs must be unique
-        for (const auto& p : numberPairs) {
-            if ((p.first.first == x1 && p.first.second == y1) ||
-                (p.second.first == x1 && p.second.second == y1) ||
-                (p.first.first == x2 && p.first.second == y2) ||
-                (p.second.first == x2 && p.second.second == y2)) {
-                std::cerr << "Error: pairs must be unique" << std::endl;
+    }
+    else {
+        for (int i = (USE_INPUT_FILE) ? 2 : optind + 2; i < nArgs; i = i + 4)
+        {
+            x1 = (USE_INPUT_FILE) ? args[i + 0] : atoi(argv[i + 0]);      
+            y1 = (USE_INPUT_FILE) ? args[i + 1] : atoi(argv[i + 1]); 
+            x2 = (USE_INPUT_FILE) ? args[i + 2] : atoi(argv[i + 2]); 
+            y2 = (USE_INPUT_FILE) ? args[i + 3] : atoi(argv[i + 3]); 
+    
+            if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
+                x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
+            std::cerr << "Error: coordinates must be within the grid" << std::endl;
+            return EXIT_FAILURE; 
+            }
+            // pairs must be unique
+            for (const auto& p : numberPairs) {
+                if ((p.first.first == x1 && p.first.second == y1) ||
+                    (p.second.first == x1 && p.second.second == y1) ||
+                    (p.first.first == x2 && p.first.second == y2) ||
+                    (p.second.first == x2 && p.second.second == y2)) {
+                    std::cerr << "Error: pairs must be unique" << std::endl;
+                    return EXIT_FAILURE;
+                }
+            }
+            // and cant be the same
+            if (x1 == x2 && y1 == y2) {
+                std::cerr << "Error: a pair cannot have the same coordinates" << std::
+                endl;
                 return EXIT_FAILURE;
             }
+    
+            // add the pair to the vector
+            numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
+                                       std::make_pair(x2,y2)));
         }
-        // and cant be the same
-        if (x1 == x2 && y1 == y2) {
-            std::cerr << "Error: a pair cannot have the same coordinates" << std::
-            endl;
-            return EXIT_FAILURE;
-        }
+    } // if not generate
 
-        // add the pair to the vector
-        numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
-                                            std::make_pair(x2,y2)));
-    }
     
     ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
     if (SHOW_INITIAL_PUZZLE) {
