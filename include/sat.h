@@ -7,6 +7,7 @@
 #include <sstream>
 #include <cstring>
 #include "puzzle.h"
+#include "options.h"
 
 class sat
 {
@@ -195,7 +196,8 @@ class sat
          */
         void solve(ThePuzzle& p, u_int8_t width, u_int8_t height, u_int8_t nPairs);
 
-        void generate();
+        std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                    std::pair<u_int16_t,u_int16_t>>> generate(u_int8_t width, u_int8_t height, u_int8_t nPairs);
 };
 
 #endif

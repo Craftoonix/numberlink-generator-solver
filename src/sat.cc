@@ -1,5 +1,7 @@
 #include "sat.h"
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, ThePuzzle & p)
 {
@@ -41,7 +43,7 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
             }
         }
     }  
-    
+
     // assign vertex literals
     for (u_int16_t y = 0; y <= height; y++)
     {
@@ -448,4 +450,37 @@ std::vector<std::vector<u_int16_t>> sat::products(const std::vector<std::vector<
     std::vector<u_int16_t> current;
     generateProducts(vectors, 0, current, result);
     return result;
+}
+
+std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                      std::pair<u_int16_t,u_int16_t>>> 
+                            sat::generate(u_int8_t width, u_int8_t height, u_int8_t nPairs)
+{
+    std::vector<u_int16_t> positions;
+    std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
+                          std::pair<u_int16_t,u_int16_t>>> numberPairs;
+    u_int16_t totalCells = width * height;
+
+    for (size_t i = 0; i < totalCells; i++)
+        positions.push_back(i);
+        
+    // randomize order
+    auto rng = std::default_random_engine {};
+    if (SEED == 0) rng.seed(time(NULL));
+    else rng.seed(SEED);
+    std::shuffle(positions.begin(), positions.end(), rng);
+    
+    // make pairs and store them in numberPairs
+    for (size_t i = 1; i <= 2*nPairs; i+=2) 
+    {
+        u_int16_t x1 = positions[i] % width;
+        u_int16_t y1 = positions[i] / width;
+        u_int16_t x2 = positions[i + 1] % width;
+        u_int16_t y2 = positions[i + 1] / width;
+        std::pair<u_int16_t,u_int16_t> firstPair  = std::make_pair(x1,y1);
+        std::pair<u_int16_t,u_int16_t> secondPair = std::make_pair(x2,y2);
+        numberPairs.push_back(std::make_pair(firstPair,secondPair));
+    }
+
+    return numberPairs;
 }

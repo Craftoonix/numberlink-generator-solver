@@ -75,7 +75,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:if:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:g:if:")) != -1) 
     {
         switch (opt)
         {
@@ -118,18 +118,25 @@ int main (int argc, char* argv[]) {
 
     // after options, there should be width, height, and pairs
     if (!USE_INPUT_FILE) {
-        if ((argc - optind + 2) % 4 != 0) {
+        if (GENERATE_PUZZLE && ((argc - optind - 3) != 0)){
+            showUsage(argv[0]);
+            return EXIT_FAILURE;
+        }
+        if (!GENERATE_PUZZLE && ((argc - optind + 2) % 4 != 0)) {
             showUsage(argv[0]);
             return EXIT_FAILURE;
         }
     }
     else {
-        if ((nArgs + 2) % 4 !=0) {
+        if (GENERATE_PUZZLE && (nArgs + 3 != 0)) {
+            showUsage(argv[0]);
+            return EXIT_FAILURE;
+        }
+        if (!GENERATE_PUZZLE && ((nArgs + 2) % 4 !=0)) {
             showUsage(argv[0]);
             return EXIT_FAILURE;
         } 
     }
-
     width = (USE_INPUT_FILE) ? args[0] : atoi(argv[optind]);
     height = (USE_INPUT_FILE) ? args[1] : atoi(argv[optind + 1]) ;
     if (width <= 0 || height <= 0) {
@@ -145,7 +152,9 @@ int main (int argc, char* argv[]) {
         switch (genProgram)
         {
         case genPrograms::SAT:
-            
+            u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
+            sat gen;
+            numberPairs = gen.generate(width,height,nPairs);
             break;
         }
     }
