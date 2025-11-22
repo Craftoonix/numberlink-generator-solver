@@ -41,23 +41,7 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
             }
         }
     }  
-
-    // // assign border literals
-    // for  (u_int16_t y = 0; y < height; y++)
-    // {
-    //     for (u_int16_t x = 0; x <= width; x++)
-    //     {
-    //         lit.vb.push_back(std::make_tuple(x,y,lit.totalLiterals++));
-    //     }
-    // }
-    // for  (u_int16_t y = 0; y <= height; y++)
-    // {
-    //     for (u_int16_t x = 0; x < width; x++)
-    //     {
-    //         lit.hb.push_back(std::make_tuple(x,y,lit.totalLiterals++));
-    //     }
-    // }
-
+    
     // assign vertex literals
     for (u_int16_t y = 0; y <= height; y++)
     {
@@ -172,7 +156,7 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             // Determine the amount of lines connected to cell
             u_int16_t nLines = lineLiterals.size();
 
-            // Every nu in/out.mber cell has only 1 line going in/out, every non-number cell
+            // Every cell has only 1 line going in/out, every non-number cell
             // has 2 lines going Denoting corresponding logic in CNF.
             // (1 or 2 True out of 2, 3 or 4 literals).
             if (current->number > 0) {           
@@ -264,64 +248,6 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
     {
         for (u_int16_t x = 0; x <= width; x++)
         {
-
-            // cnf << findLineLiteral(x-1,y-1,HORIZONTOAL) << " ";
-            // cnf << findVertexDirLiteral(vertexLiteral,UP) << " 0\n";
-            // nClauses++;
-            
-            // cnf << -findLineLiteral(x-1,y-1,HORIZONTOAL) << " ";
-            // cnf << -findVertexDirLiteral(vertexLiteral,UP) << " 0\n";
-            // nClauses++;
-
-            // cnf << findLineLiteral(x,y-1,VERTICAL) << " ";
-            // cnf << findVertexDirLiteral(vertexLiteral,RIGHT) << " 0\n";
-            // nClauses++;
-            
-            // cnf << -findLineLiteral(x,y-1,VERTICAL) << " ";
-            // cnf << -findVertexDirLiteral(vertexLiteral,RIGHT) << " 0\n";
-            // nClauses++;
-            
-            // cnf << findLineLiteral(x-1,y,HORIZONTOAL) << " ";
-            // cnf << findVertexDirLiteral(vertexLiteral,DOWN) << " 0\n";
-            // nClauses++;
-            
-            // cnf << -findLineLiteral(x-1,y,HORIZONTOAL) << " ";
-            // cnf << -findVertexDirLiteral(vertexLiteral,DOWN) << " 0\n";
-            // nClauses++;
-            
-            // cnf << findLineLiteral(x-1,y-1,VERTICAL) << " ";
-            // cnf << findVertexDirLiteral(vertexLiteral,LEFT) << " 0\n";
-            // nClauses++;
-            
-            // cnf << -findLineLiteral(x-1,y-1,VERTICAL) << " ";
-            // cnf << -findVertexDirLiteral(vertexLiteral,LEFT) << " 0\n";
-            // nClauses++;
-
-            // only 1 vertex directional literal is true per line
-
-            // if (x > 1) {
-            //     u_int16_t prevVertex = findVertexLiteral(x-1,y);
-            //     cnf << findVertexDirLiteral(vertexLiteral,LEFT) << " ";
-            //     cnf << findVertexDirLiteral(prevVertex,RIGHT) << " 0\n";
-            //     nClauses++;
-    
-            //     cnf << -findVertexDirLiteral(vertexLiteral,LEFT) << " ";
-            //     cnf << -findVertexDirLiteral(prevVertex,RIGHT) << " 0\n";
-            //     nClauses++;
-            // }
-            // if (y > 1) {
-            //     u_int16_t prevVertex = findVertexLiteral(x,y-1);
-            //     cnf << findVertexDirLiteral(vertexLiteral,UP) << " ";
-            //     cnf << findVertexDirLiteral(prevVertex,DOWN) << " 0\n";
-            //     nClauses++;
-    
-            //     cnf << -findVertexDirLiteral(vertexLiteral,UP) << " ";
-            //     cnf << -findVertexDirLiteral(prevVertex,DOWN) << " 0\n";
-            //     nClauses++;
-            // }
-            // line literal is true OR corresponding vertex directional literal is true
-
-            
             u_int16_t vertexLiteral = findVertexLiteral(x,y);
             std::vector<u_int16_t> VertexDirLiterals;
 
