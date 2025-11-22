@@ -6,12 +6,12 @@
 #include "options.h"
 #include "sat.h"
 
-enum genPrograms
+enum class genPrograms
 {
     SAT,
 } genProgram;
 
-enum solverPrograms
+enum class solverPrograms
 {
     DFS,
     SAT,
@@ -104,12 +104,13 @@ int main (int argc, char* argv[]) {
         case 'g':
             // generate a puzzle
             GENERATE_PUZZLE = true;
-            if (strcmp(optarg, "sat") == 0 )
+            if (strcmp(optarg, "sat") == 0)
                 genProgram = genPrograms::SAT;
             else {
                 std::cerr << "Error: unknown generator method '" << optarg << "'\n";
                 return EXIT_FAILURE;
             }
+            break;
         case '?':
             std::cerr << "Unknown option: " << char(optopt) << std::endl;
         }
@@ -146,7 +147,6 @@ int main (int argc, char* argv[]) {
         case genPrograms::SAT:
             
             break;
-        
         }
     }
     else {
@@ -196,11 +196,11 @@ int main (int argc, char* argv[]) {
         return EXIT_SUCCESS; // nothing more to do
     }
 
-    if (solverProgram == DFS) {
+    if (solverProgram == solverPrograms::DFS) {
         dfs DFSsolver;
         DFSsolver.solveWrapper(numberlink);
     }
-    else if (solverProgram == SAT)
+    else if (solverProgram == solverPrograms::SAT)
     {
         sat SATsolver;
         SATsolver.solve(numberlink,width,height, numberPairs.size());

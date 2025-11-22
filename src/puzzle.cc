@@ -46,30 +46,7 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
 // destructor
 ThePuzzle::~ThePuzzle()
 {
-    // delete all cells and liens
-    Cell* Vdeletor = in;
-    Cell* Hdeletor = Vdeletor->adjacent[RIGHT];
-    for (size_t i = 0; i < height; i++) {
-        if (i != 0) {
-            delete Vdeletor->lines[RIGHT];
-            Vdeletor = Vdeletor->adjacent[DOWN];
-            delete Vdeletor->adjacent[UP];
-            delete Vdeletor->lines[UP];
-            Hdeletor = Vdeletor->adjacent[RIGHT];
-        }
-        for (size_t j = 2; j <= width; j++) {
-            if (Hdeletor->lines[UP] != nullptr)
-                delete Hdeletor->lines[UP];
-            if (j == width) { // last cell in the row
-                delete Hdeletor;
-                continue;
-            }
-            Hdeletor = Hdeletor->adjacent[RIGHT];
-            delete Hdeletor->adjacent[LEFT];
-            delete Hdeletor->lines[LEFT];
-        }//for j  
-    }//for i
-    delete Vdeletor;
+    deletePuzzle();
 }//~ThePuzzle
 
 void ThePuzzle::createGrid()
@@ -159,6 +136,34 @@ void ThePuzzle::printPuzzle()
         std::cout << "+-";
     }
     std::cout << "+" << std::endl;
+}
+
+void ThePuzzle::deletePuzzle()
+{
+    // delete all cells and liens
+    Cell* Vdeletor = in;
+    Cell* Hdeletor = Vdeletor->adjacent[RIGHT];
+    for (size_t i = 0; i < height; i++) {
+        if (i != 0) {
+            delete Vdeletor->lines[RIGHT];
+            Vdeletor = Vdeletor->adjacent[DOWN];
+            delete Vdeletor->adjacent[UP];
+            delete Vdeletor->lines[UP];
+            Hdeletor = Vdeletor->adjacent[RIGHT];
+        }
+        for (size_t j = 2; j <= width; j++) {
+            if (Hdeletor->lines[UP] != nullptr)
+                delete Hdeletor->lines[UP];
+            if (j == width) { // last cell in the row
+                delete Hdeletor;
+                continue;
+            }
+            Hdeletor = Hdeletor->adjacent[RIGHT];
+            delete Hdeletor->adjacent[LEFT];
+            delete Hdeletor->lines[LEFT];
+        }//for j  
+    }//for i
+    delete Vdeletor;    
 }
 
 bool ThePuzzle::isSolved()

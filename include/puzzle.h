@@ -35,6 +35,8 @@ class ThePuzzle {
          */
         void printPuzzle();
 
+        void deletePuzzle();
+
         /**
          * @brief 
          * 
