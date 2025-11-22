@@ -444,7 +444,8 @@ void sat::generateProducts(const std::vector<std::vector<u_int16_t>> &vectors, u
     }
 }
 
-std::vector<std::vector<u_int16_t>> sat::products(const std::vector<std::vector<u_int16_t>> & vectors)
+std::vector<std::vector<u_int16_t>> 
+sat::products(const std::vector<std::vector<u_int16_t>> & vectors)
 {
     std::vector<std::vector<u_int16_t>> result;
     std::vector<u_int16_t> current;
@@ -454,7 +455,7 @@ std::vector<std::vector<u_int16_t>> sat::products(const std::vector<std::vector<
 
 std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
                       std::pair<u_int16_t,u_int16_t>>> 
-                            sat::generate(u_int8_t width, u_int8_t height, u_int8_t nPairs)
+sat::generate(u_int8_t width, u_int8_t height, u_int8_t nPairs, u_int64_t seed)
 {
     std::vector<u_int16_t> positions;
     std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
@@ -466,8 +467,8 @@ std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
         
     // randomize order
     auto rng = std::default_random_engine {};
-    if (SEED == 0) rng.seed(time(NULL));
-    else rng.seed(SEED);
+    if (seed == 0) rng.seed(time(NULL));
+    else rng.seed(seed);
     std::shuffle(positions.begin(), positions.end(), rng);
     
     // make pairs and store them in numberPairs

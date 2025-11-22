@@ -75,7 +75,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:g:if:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:g:r:if:")) != -1) 
     {
         switch (opt)
         {
@@ -100,6 +100,9 @@ int main (int argc, char* argv[]) {
             USE_INPUT_FILE = true;
             //optind = 0;
             if (parseInputFile(nArgs, args)) return EXIT_FAILURE;
+            break;
+        case 'r':
+            SEED = atoi(optarg);
             break;
         case 'g':
             // generate a puzzle
@@ -154,7 +157,7 @@ int main (int argc, char* argv[]) {
         case genPrograms::SAT:
             u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
             sat gen;
-            numberPairs = gen.generate(width,height,nPairs);
+            numberPairs = gen.generate(width,height,nPairs, SEED);
             break;
         }
     }
