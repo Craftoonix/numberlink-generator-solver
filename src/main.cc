@@ -157,7 +157,16 @@ int main (int argc, char* argv[]) {
         case genPrograms::SAT:
             u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
             sat gen;
-            numberPairs = gen.generate(width,height,nPairs, SEED);
+            while (true)
+            {
+                // generate a puzzle
+                numberPairs = gen.generate(width,height,nPairs, SEED);
+                ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
+
+                // check if it is solvable and redo if not
+                gen.solve(numberlink,width,height,nPairs);
+                if (numberlink.isSolved()) break;
+            }
             break;
         }
     }
