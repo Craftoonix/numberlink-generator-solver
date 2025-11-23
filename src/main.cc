@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "options.h"
 #include "sat.h"
+#include "heuristics.h"
 
 enum class genPrograms
 {
@@ -95,6 +96,9 @@ int main (int argc, char* argv[]) {
             // show the initial puzzle
             SHOW_INITIAL_PUZZLE = true;
             break;
+        case 'h':
+            USE_HEURISTICS = true;
+            break;
         case 'f':
             INPUT_FILE = optarg;
             USE_INPUT_FILE = true;
@@ -163,9 +167,18 @@ int main (int argc, char* argv[]) {
                 numberPairs = gen.generate(width,height,nPairs, SEED);
                 ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
 
+                // prepare heuristic
+                if (USE_HEURISTICS){                
+                    heuristics heur(numberlink);
+
+                    if (!heur.isSolvable())
+                    continue;
+                }
+
                 // check if it is solvable and redo if not
                 gen.solve(numberlink,width,height,nPairs);
-                if (numberlink.isSolved()) break;
+                if (numberlink.isSolved())
+                    break;
             }
             break;
         }

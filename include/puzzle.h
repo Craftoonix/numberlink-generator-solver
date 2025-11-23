@@ -13,21 +13,24 @@
  */
 class ThePuzzle {
     private:
-        u_int16_t width;   // and width
-        u_int16_t height;  // actual height
-        
-        /**
-         * @brief Create the grid of the puzzle using linked lists
-         * 
-         */
-        void createGrid();
+    
+    /**
+     * @brief Create the grid of the puzzle using linked lists
+     * 
+     */
+    void createGrid();
     
     public:
+    
+        u_int16_t width;   // and width
+        u_int16_t height;  // actual height
         u_int16_t numPairs; // number of pairs of numbers
+
+        ThePuzzle();
         ThePuzzle(u_int16_t w, u_int16_t h, 
             std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
             std::pair<u_int16_t,u_int16_t>>> n);
-        ~ThePuzzle ();
+        ~ThePuzzle();
             
         /**
          * @brief Prints the puzzle to the console

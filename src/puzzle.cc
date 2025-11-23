@@ -8,6 +8,14 @@
 #include <sstream>
 #include <cstring>
 
+ThePuzzle::ThePuzzle()
+{
+    width = 0;
+    height = 0;
+    numPairs = 0;
+    in = nullptr;
+}
+
 
 // constructor
 ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h, 
