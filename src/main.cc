@@ -76,7 +76,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:g:r:if:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:g:r:hif:")) != -1) 
     {
         switch (opt)
         {
@@ -168,11 +168,13 @@ int main (int argc, char* argv[]) {
                 ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
 
                 // prepare heuristic
-                if (USE_HEURISTICS){                
-                    heuristics heur(numberlink);
+                if (USE_HEURISTICS){ 
+                    heuristics heur;               
+                    heur.setPuzzle(&numberlink);
 
-                    if (!heur.isSolvable())
-                    continue;
+                    if (!heur.isSolvable()){
+                        continue;
+                    }
                 }
 
                 // check if it is solvable and redo if not

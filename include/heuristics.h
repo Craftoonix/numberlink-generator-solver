@@ -7,11 +7,12 @@ class heuristics
 {
     public:
         heuristics();
-        heuristics(ThePuzzle numberlink);
+        ~heuristics();
         bool isSolvable();
+        void setPuzzle(ThePuzzle* puzzle);
     private:
-        bool checkCorner(Cell* corner);
-        ThePuzzle p;
+        bool checkCorners();
+        ThePuzzle* p;
 };
 
 #endif
