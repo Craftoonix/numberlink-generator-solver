@@ -34,7 +34,6 @@ bool heuristics::checkCorners()
     if (upRight->adjacent[LEFT]->number != 0 && upRight->adjacent[DOWN]->number != 0 &&
         upRight->adjacent[LEFT]->number != upRight->adjacent[DOWN]->number)
         return true;  
-   
 
     // check upper left corner
     if (upLeft->adjacent[RIGHT]->number != 0 && upLeft->adjacent[DOWN]->number != 0 &&
