@@ -25,13 +25,17 @@ class heuristics
         void setPuzzle(ThePuzzle* puzzle);
     private:
         /**
-         * @brief Checks the corners of the puzzle whether one of them is enclosed
+         * @brief Checks for enclosures for each cell of the puzzle
          * 
-         * @return true one of the corners are enclosed
-         * @return false none of the corners are enclosed
+         * @return true at least 1 cell is enclosed
+         * @return false none of the cells are enclosed
          */
-        bool checkCorners();
+        bool checkBlockades();
         ThePuzzle* p;
+
+        bool emptyNeighbor(std::vector<u_int16_t> &neighbor);
+        bool connectingCell(std::vector<u_int16_t> &neighbors, u_int16_t num);
+        bool connectingNeighbors(std::vector<u_int16_t> &neighbors);
 };
 
 #endif
