@@ -161,10 +161,15 @@ int main (int argc, char* argv[]) {
         case genPrograms::SAT:
             u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
             sat gen;
+
+            //set seed
+            if (SEED==0) srand(time(NULL));
+            else srand(SEED);
+
             while (true)
             {
                 // generate a puzzle
-                numberPairs = gen.generate(width,height,nPairs, SEED);
+                numberPairs = gen.generate(width,height,nPairs, rand());
                 ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
 
                 // prepare heuristic

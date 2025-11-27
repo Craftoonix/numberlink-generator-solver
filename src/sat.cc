@@ -467,8 +467,7 @@ sat::generate(u_int8_t width, u_int8_t height, u_int8_t nPairs, u_int64_t seed)
         
     // randomize order
     auto rng = std::default_random_engine {};
-    if (seed == 0) rng.seed(time(NULL));
-    else rng.seed(seed);
+    rng.seed(seed);
     std::shuffle(positions.begin(), positions.end(), rng);
     
     // make pairs and store them in numberPairs

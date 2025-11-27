@@ -9,7 +9,7 @@ static bool USE_INPUT_FILE = false;
 static bool GENERATE_PUZZLE = false;
 static bool USE_HEURISTICS = false;
 
-static u_int64_t SEED = 0;
+static int SEED = 0;
 
 static std::string INPUT_FILE = "";
 
