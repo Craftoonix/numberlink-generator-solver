@@ -55,4 +55,3 @@ make clean
 -h: Make use of (H)euristics for the possibility of generating puzzles faster
 
 ### Configuration
-

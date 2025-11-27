@@ -36,6 +36,8 @@ class heuristics
         bool emptyNeighbor(std::vector<u_int16_t> &neighbor);
         bool connectingCell(std::vector<u_int16_t> &neighbors, u_int16_t num);
         bool connectingNeighbors(std::vector<u_int16_t> &neighbors);
+
+        bool parity();
 };
 
 #endif

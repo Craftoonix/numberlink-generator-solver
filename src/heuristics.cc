@@ -21,6 +21,8 @@ bool heuristics::isSolvable()
 {
     if (checkBlockades())
         return false;
+    if (!parity())   
+        return false; 
     return true;
 }
 
@@ -58,6 +60,23 @@ bool heuristics::connectingNeighbors(std::vector<u_int16_t> &neighbors)
     return false;
 }
 
+bool heuristics::parity()
+{
+    u_int16_t totalCells = p->width * p->height;
+    u_int16_t minCellsOccupied = 0; // minimal number of occupied cells
+    u_int16_t availableCells = totalCells - 2*p->numPairs; // amount of empty cells
+
+    // setup minCellsOccupied
+    for (auto it : p->numberPairs)
+    {
+        minCellsOccupied += abs(it.first.first - it.first.second)
+                          + abs(it.second.first - it.second.second);        
+    }
+    minCellsOccupied -= p->numPairs;
+
+    return ((availableCells - minCellsOccupied) % 2 == totalCells % 2);
+}
+
 bool heuristics::checkBlockades()
 {
     for (size_t y = 0; y < p->height; y++)
@@ -74,9 +93,6 @@ bool heuristics::checkBlockades()
                 }
             }
 
-            // for (auto it : neighbors) printf("%i ",it); 
-            // printf("\n");
-
             // there is an empty neighboring cell, no blockade
             if (emptyNeighbor(neighbors)) continue;
 
@@ -91,31 +107,5 @@ bool heuristics::checkBlockades()
         }
     }
 
-
-    // Cell* upLeft = p->in;
-    // Cell* upRight = p->findCell(p->width - 1,0);
-    // Cell* lowLeft = p->findCell(0,p->height - 1);
-    // Cell* lowRight = p->findCell(p->width - 1,p->height - 1);
-
-    // // check upper right corner
-    // if (upRight->adjacent[LEFT]->number != 0 && upRight->adjacent[DOWN]->number != 0 &&
-    //     upRight->adjacent[LEFT]->number != upRight->adjacent[DOWN]->number)
-    //     return true;  
-
-    // // check upper left corner
-    // if (upLeft->adjacent[RIGHT]->number != 0 && upLeft->adjacent[DOWN]->number != 0 &&
-    //     upLeft->adjacent[RIGHT]->number != upLeft->adjacent[DOWN]->number)
-    //     return true;
-    
-
-    // // check lower right corner
-    // if (lowRight->adjacent[LEFT]->number != 0 && lowRight->adjacent[UP]->number != 0 &&
-    //     lowRight->adjacent[LEFT]->number != lowRight->adjacent[UP]->number)
-    //     return true;
- 
-    // // check lower left corner
-    // if (lowLeft->adjacent[RIGHT]->number != 0 && lowLeft->adjacent[UP]->number != 0 &&
-    //     lowLeft->adjacent[RIGHT]->number != lowLeft->adjacent[UP]->number)
-    //     return true;
     return false;
 }
