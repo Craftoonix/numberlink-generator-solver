@@ -145,8 +145,8 @@ void ThePuzzle::printPuzzle()
         std::cout << "+" << std::endl;
         for (size_t j = 0; j < width; j++) {
             if (j > 0 && Hprinter->lines[LEFT]->connected)
-                std::cout << "X" << Hprinter->number;
-            else std::cout << "|" << Hprinter->number;
+                std::cout << "X" << getChar(Hprinter->number);
+            else std::cout << "|" << getChar(Hprinter->number);
             Hprinter = Hprinter->adjacent[RIGHT];
         }
         std::cout << "|" << std::endl;
