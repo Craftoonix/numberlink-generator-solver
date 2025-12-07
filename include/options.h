@@ -8,8 +8,10 @@ static bool SOLVE_PUZZLE = false;
 static bool USE_INPUT_FILE = false;
 static bool GENERATE_PUZZLE = false;
 static bool USE_HEURISTICS = false;
+static bool EXPERIMENTAL_MODE = false;
 
 static int SEED = 0;
+static u_int16_t N = 1;
 
 static std::string INPUT_FILE = "";
 

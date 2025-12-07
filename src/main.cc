@@ -6,6 +6,7 @@
 #include "options.h"
 #include "sat.h"
 #include "heuristics.h"
+#include "experiments.h"
 
 enum class genPrograms
 {
@@ -76,7 +77,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:g:r:hif:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:n:g:r:hif:")) != -1) 
     {
         switch (opt)
         {
@@ -118,6 +119,11 @@ int main (int argc, char* argv[]) {
                 return EXIT_FAILURE;
             }
             break;
+        case 'n':
+            // experiments mode
+            EXPERIMENTAL_MODE = true;
+            N = atoi(optarg);
+            break;
         case '?':
             std::cerr << "Unknown option: " << char(optopt) << std::endl;
         }
@@ -155,104 +161,122 @@ int main (int argc, char* argv[]) {
         return EXIT_FAILURE; 
     }
 
-    if (GENERATE_PUZZLE){
-        switch (genProgram)
-        {
-        case genPrograms::SAT:
-            u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
-            sat gen;
-
-            //set seed
-            if (SEED==0) srand(time(NULL));
-            else srand(SEED);
-
-            while (true)
+    ExperimentTimer timer;
+    for (size_t E = 0; E < N; E++)
+    {
+        timer.start();
+        if (GENERATE_PUZZLE){
+            switch (genProgram)
             {
-                // generate a puzzle
-                numberPairs = gen.generate(width,height,nPairs, rand());
-                ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
-
-                // prepare heuristic
-                if (USE_HEURISTICS){ 
-                    heuristics heur;               
-                    heur.setPuzzle(&numberlink);
-
-                    if (!heur.isSolvable()){
-                        continue;
+            case genPrograms::SAT:
+                u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
+                sat gen;
+    
+                //set seed
+                if (SEED==0) srand(time(NULL));
+                else srand(SEED);
+    
+                while (true)
+                {
+                    // generate a puzzle
+                    numberPairs = gen.generate(width,height,nPairs, rand());
+                    ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
+    
+                    // prepare heuristic
+                    if (USE_HEURISTICS){ 
+                        heuristics heur;               
+                        heur.setPuzzle(&numberlink);
+    
+                        if (!heur.isSolvable()){
+                            continue;
+                        }
+                    }
+    
+                    // check if it is solvable and redo if not
+                    gen.solve(numberlink,width,height,nPairs);
+                    if (numberlink.isSolved())
+                        break;
+                }
+                break;
+            }
+        }
+        else {
+            for (int i = (USE_INPUT_FILE) ? 2 : optind + 2; i < nArgs; i = i + 4)
+            {
+                x1 = (USE_INPUT_FILE) ? args[i + 0] : atoi(argv[i + 0]);      
+                y1 = (USE_INPUT_FILE) ? args[i + 1] : atoi(argv[i + 1]); 
+                x2 = (USE_INPUT_FILE) ? args[i + 2] : atoi(argv[i + 2]); 
+                y2 = (USE_INPUT_FILE) ? args[i + 3] : atoi(argv[i + 3]); 
+        
+                if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
+                    x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
+                std::cerr << "Error: coordinates must be within the grid" << std::endl;
+                return EXIT_FAILURE; 
+                }
+                // pairs must be unique
+                for (const auto& p : numberPairs) {
+                    if ((p.first.first == x1 && p.first.second == y1) ||
+                        (p.second.first == x1 && p.second.second == y1) ||
+                        (p.first.first == x2 && p.first.second == y2) ||
+                        (p.second.first == x2 && p.second.second == y2)) {
+                        std::cerr << "Error: pairs must be unique" << std::endl;
+                        return EXIT_FAILURE;
                     }
                 }
-
-                // check if it is solvable and redo if not
-                gen.solve(numberlink,width,height,nPairs);
-                if (numberlink.isSolved())
-                    break;
-            }
-            break;
-        }
-    }
-    else {
-        for (int i = (USE_INPUT_FILE) ? 2 : optind + 2; i < nArgs; i = i + 4)
-        {
-            x1 = (USE_INPUT_FILE) ? args[i + 0] : atoi(argv[i + 0]);      
-            y1 = (USE_INPUT_FILE) ? args[i + 1] : atoi(argv[i + 1]); 
-            x2 = (USE_INPUT_FILE) ? args[i + 2] : atoi(argv[i + 2]); 
-            y2 = (USE_INPUT_FILE) ? args[i + 3] : atoi(argv[i + 3]); 
-    
-            if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
-                x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
-            std::cerr << "Error: coordinates must be within the grid" << std::endl;
-            return EXIT_FAILURE; 
-            }
-            // pairs must be unique
-            for (const auto& p : numberPairs) {
-                if ((p.first.first == x1 && p.first.second == y1) ||
-                    (p.second.first == x1 && p.second.second == y1) ||
-                    (p.first.first == x2 && p.first.second == y2) ||
-                    (p.second.first == x2 && p.second.second == y2)) {
-                    std::cerr << "Error: pairs must be unique" << std::endl;
+                // and cant be the same
+                if (x1 == x2 && y1 == y2) {
+                    std::cerr << "Error: a pair cannot have the same coordinates" << std::
+                    endl;
                     return EXIT_FAILURE;
                 }
+        
+                // add the pair to the vector
+                numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
+                                            std::make_pair(x2,y2)));
             }
-            // and cant be the same
-            if (x1 == x2 && y1 == y2) {
-                std::cerr << "Error: a pair cannot have the same coordinates" << std::
-                endl;
-                return EXIT_FAILURE;
-            }
+        } // if not generate
     
-            // add the pair to the vector
-            numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
-                                       std::make_pair(x2,y2)));
+        
+        ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
+        if (SHOW_INITIAL_PUZZLE) {
+            std::cout << "Initial puzzle:\n";
+            numberlink.printPuzzle();
+            std::cout << std::endl;
         }
-    } // if not generate
-
+        if (!SOLVE_PUZZLE) {
+            return EXIT_SUCCESS; // nothing more to do
+        }
     
-    ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
-    if (SHOW_INITIAL_PUZZLE) {
-        std::cout << "Initial puzzle:\n";
-        numberlink.printPuzzle();
-        std::cout << std::endl;
-    }
-    if (!SOLVE_PUZZLE) {
-        return EXIT_SUCCESS; // nothing more to do
+        if (solverProgram == solverPrograms::DFS) {
+            dfs DFSsolver;
+            DFSsolver.solveWrapper(numberlink);
+        }
+        else if (solverProgram == solverPrograms::SAT)
+        {
+            sat SATsolver;
+            SATsolver.solve(numberlink,width,height, numberPairs.size());
+        }
+    
+        if (!numberlink.isSolved()) {
+            std::cout << "No solution found.\n";
+            return EXIT_FAILURE;
+        }
+        if (!EXPERIMENTAL_MODE)
+        {
+            std::cout << "Solved puzzle:\n";
+            numberlink.printPuzzle();     
+            return EXIT_SUCCESS;   
+        }
+        numberPairs.clear();
+        timer.end();
     }
 
-    if (solverProgram == solverPrograms::DFS) {
-        dfs DFSsolver;
-        DFSsolver.solveWrapper(numberlink);
-    }
-    else if (solverProgram == solverPrograms::SAT)
+    if (EXPERIMENTAL_MODE)
     {
-        sat SATsolver;
-        SATsolver.solve(numberlink,width,height, numberPairs.size());
+        timer.printStatisticsCSV(std::cout);
+        timer.printStatistics(std::cout);
     }
 
-    if (!numberlink.isSolved()) {
-        std::cout << "No solution found.\n";
-        return EXIT_FAILURE;
-    }
-    std::cout << "Solved puzzle:\n";
-    numberlink.printPuzzle();
     
     return EXIT_SUCCESS;
 }//main
