@@ -114,6 +114,19 @@ void ThePuzzle::createGrid()
     } // for y
 } // ThePuzzle::createGrid
 
+char ThePuzzle::getChar(u_int16_t number)
+{
+    // return the number in char
+    if (number <= 9) return number + '0';
+
+    // number has to be lesser than every digit (1-9) - '0' + every letter (A-Z)
+    else if (number <= 35)
+        // return capitalized alphabet 
+        return number - 10 + 'A';
+    std::cerr << "ERROR: Number too big" << std::endl;
+    return number;
+}
+
 void ThePuzzle::printPuzzle()
 {
     Cell* Hprinter = in;

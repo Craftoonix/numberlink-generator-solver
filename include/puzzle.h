@@ -14,11 +14,19 @@
 class ThePuzzle {
     private:
     
-    /**
-     * @brief Create the grid of the puzzle using linked lists
-     * 
-     */
-    void createGrid();
+        /**
+         * @brief Create the grid of the puzzle using linked lists
+         * 
+         */
+        void createGrid();
+
+        /**
+         * @brief Get the charactor to print corresponding to the number
+         * 
+         * @param number the corresponding number
+         * @return the character
+         */
+        char getChar(u_int16_t number);
     
     public:
     
