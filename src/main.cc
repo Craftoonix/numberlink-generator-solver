@@ -8,6 +8,10 @@
 #include "heuristics.h"
 #include "experiments.h"
 
+typedef std::pair<uint16_t,uint16_t> coordinate_t;
+typedef std::pair<coordinate_t,coordinate_t> numpair_t;
+typedef std::vector<numpair_t> numberpairs_t;
+
 enum class genPrograms
 {
     SAT,
@@ -59,8 +63,93 @@ bool parseInputFile(int & nArgs, u_int16_t args[])
         args[counter] = coord;
         counter++;
     }
-    nArgs = counter;
+    nArgs = counter/N;
     return 0;
+}
+
+bool parsePuzzleConfigFile(int nArgs, u_int16_t args[], int width, int height, std::vector<numberpairs_t> & puzzleConfigs)
+{
+    int i = 2;
+    for (int I = 1; I <= N; I++)
+    {
+        int x1,x2,y1,y2;
+        numberpairs_t numberPairs;
+        for (; i < I*nArgs; i = i + 4)
+        {
+            x1 = args[i + 0];      
+            y1 = args[i + 1]; 
+            x2 = args[i + 2]; 
+            y2 = args[i + 3]; 
+            
+            if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
+                x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
+                std::cerr << "Error: coordinates must be within the grid" << std::endl;
+                return false;; 
+            }
+            // pairs must be unique
+            for (const auto& p : numberPairs) {
+                if ((p.first.first == x1 && p.first.second == y1) ||
+                (p.second.first == x1 && p.second.second == y1) ||
+                (p.first.first == x2 && p.first.second == y2) ||
+                (p.second.first == x2 && p.second.second == y2)) {
+                    std::cerr << "Error: pairs must be unique" << std::endl;
+                    return false;
+                }
+            }
+            // and cant be the same
+            if (x1 == x2 && y1 == y2) {
+                std::cerr << "Error: a pair cannot have the same coordinates" << std::
+                endl;
+                return false;;
+            }
+            
+            // add the pair to the vector
+            numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
+            std::make_pair(x2,y2)));
+        }
+        puzzleConfigs.push_back(numberPairs);
+        i = I*nArgs + 2;
+    }
+    return true;
+}
+
+bool parsePuzzleConfig(int nArgs, char* argv[], uint16_t width, uint16_t height, numberpairs_t & numberPairs)
+{
+    int x1,x2,y1,y2;
+    for (int i = optind + 2; i < nArgs; i = i + 4)
+    {
+        x1 = atoi(argv[i + 0]);      
+        y1 = atoi(argv[i + 1]); 
+        x2 = atoi(argv[i + 2]); 
+        y2 = atoi(argv[i + 3]); 
+        
+        if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
+            x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
+            std::cerr << "Error: coordinates must be within the grid" << std::endl;
+            return false; 
+        }
+        // pairs must be unique
+        for (const auto& p : numberPairs) {
+            if ((p.first.first == x1 && p.first.second == y1) ||
+            (p.second.first == x1 && p.second.second == y1) ||
+            (p.first.first == x2 && p.first.second == y2) ||
+            (p.second.first == x2 && p.second.second == y2)) {
+                std::cerr << "Error: pairs must be unique" << std::endl;
+                return false;
+            }
+        }
+        // and cant be the same
+        if (x1 == x2 && y1 == y2) {
+            std::cerr << "Error: a pair cannot have the same coordinates" << std::
+            endl;
+            return false;
+        }
+        
+        // add the pair to the vector
+        numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
+        std::make_pair(x2,y2)));
+    }
+    return true;
 }
 
 
@@ -69,15 +158,13 @@ int main (int argc, char* argv[]) {
     int opt;
     int nArgs = argc;
     int width, height;
-    int x1, x2, y1, y2;
-    u_int16_t args[MAX_CELLS * MAX_CELLS];
+    u_int16_t args[100 * MAX_CELLS * MAX_CELLS];
     //create vector of pairs of coordinates of numbers
-    std::vector<std::pair<std::pair<u_int16_t,u_int16_t>,
-                            std::pair<u_int16_t,u_int16_t>>> numberPairs;
+    std::vector<numberpairs_t> puzzleConfigs;// numberpairs_t numberPairs;
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:n:g:r:hif:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:n:g:r:o:hif:")) != -1) 
     {
         switch (opt)
         {
@@ -105,6 +192,10 @@ int main (int argc, char* argv[]) {
             USE_INPUT_FILE = true;
             //optind = 0;
             if (parseInputFile(nArgs, args)) return EXIT_FAILURE;
+            break;
+        case 'o': 
+            OUTPUT_FILE = optarg;
+            USE_OUTPUT_FILE = true;
             break;
         case 'r':
             SEED = atoi(optarg);
@@ -161,82 +252,82 @@ int main (int argc, char* argv[]) {
         return EXIT_FAILURE; 
     }
 
-    ExperimentTimer timer;
-    for (size_t E = 0; E < N; E++)
-    {
-        timer.start();
-        if (GENERATE_PUZZLE){
-            switch (genProgram)
-            {
+    if (GENERATE_PUZZLE){
+        switch (genProgram)
+        {
             case genPrograms::SAT:
-                u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
-                sat gen;
-    
-                //set seed
-                if (SEED==0) srand(time(NULL));
-                else srand(SEED);
-    
+            u_int16_t nPairs = (USE_INPUT_FILE) ? args[2] : atoi(argv[optind+2]);
+            sat gen;
+            
+            //set seed
+            if (SEED==0) srand(time(NULL));
+            else srand(SEED);
+
+            std::ofstream outputfile;
+            if (USE_OUTPUT_FILE) outputfile.open(OUTPUT_FILE);
+            for (size_t I = 0; I < N; I++)
+            {
+                
                 while (true)
                 {
                     // generate a puzzle
+                    numberpairs_t numberPairs;
                     numberPairs = gen.generate(width,height,nPairs, rand());
                     ThePuzzle numberlink((u_int16_t)width,(u_int16_t)height,numberPairs);
-    
+                    
                     // prepare heuristic
                     if (USE_HEURISTICS){ 
                         heuristics heur;               
                         heur.setPuzzle(&numberlink);
-    
+                        
                         if (!heur.isSolvable()){
                             continue;
                         }
                     }
-    
+                    
                     // check if it is solvable and redo if not
                     gen.solve(numberlink,width,height,nPairs);
-                    if (numberlink.isSolved())
+                    if (numberlink.isSolved()) {
+                        puzzleConfigs.push_back(numberPairs); // store coordinates
+                        // output to output file
+                        if (USE_OUTPUT_FILE)
+                        {
+                            outputfile << width << " ";
+                            outputfile << height << " ";
+                            for (auto it : numberPairs)
+                            {
+                                outputfile << it.first.first << " ";
+                                outputfile << it.first.second << " ";
+                                outputfile << it.second.first << " ";
+                                outputfile << it.second.second << " ";
+                            }
+                            outputfile << "\n";
+                        }
                         break;
-                }
-                break;
-            }
-        }
-        else {
-            for (int i = (USE_INPUT_FILE) ? 2 : optind + 2; i < nArgs; i = i + 4)
-            {
-                x1 = (USE_INPUT_FILE) ? args[i + 0] : atoi(argv[i + 0]);      
-                y1 = (USE_INPUT_FILE) ? args[i + 1] : atoi(argv[i + 1]); 
-                x2 = (USE_INPUT_FILE) ? args[i + 2] : atoi(argv[i + 2]); 
-                y2 = (USE_INPUT_FILE) ? args[i + 3] : atoi(argv[i + 3]); 
-        
-                if (x1 < 0 || x1 >= width || y1 < 0 || y1 >= height ||
-                    x2 < 0 || x2 >= width || y2 < 0 || y2 >= height) {
-                std::cerr << "Error: coordinates must be within the grid" << std::endl;
-                return EXIT_FAILURE; 
-                }
-                // pairs must be unique
-                for (const auto& p : numberPairs) {
-                    if ((p.first.first == x1 && p.first.second == y1) ||
-                        (p.second.first == x1 && p.second.second == y1) ||
-                        (p.first.first == x2 && p.first.second == y2) ||
-                        (p.second.first == x2 && p.second.second == y2)) {
-                        std::cerr << "Error: pairs must be unique" << std::endl;
-                        return EXIT_FAILURE;
                     }
                 }
-                // and cant be the same
-                if (x1 == x2 && y1 == y2) {
-                    std::cerr << "Error: a pair cannot have the same coordinates" << std::
-                    endl;
-                    return EXIT_FAILURE;
-                }
-        
-                // add the pair to the vector
-                numberPairs.push_back(std::make_pair(std::make_pair(x1,y1),
-                                            std::make_pair(x2,y2)));
             }
-        } // if not generate
-    
+            if (USE_OUTPUT_FILE) outputfile.close();
+        }
+    }
+    else {
+        if (USE_INPUT_FILE) {
+            if (!parsePuzzleConfigFile(nArgs,args,width,height,puzzleConfigs))
+                return EXIT_FAILURE;
+        }
+        else {
+            if (!parsePuzzleConfig(nArgs, argv, width, height,puzzleConfigs.at(0)))
+                return EXIT_FAILURE;
+        }
+    } // if not generate
         
+        
+    ExperimentTimer timer;
+    for (size_t E = 0; E < N; E++)
+    {
+        timer.start();
+        numberpairs_t numberPairs = puzzleConfigs.at(E);
+
         ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
         if (SHOW_INITIAL_PUZZLE) {
             std::cout << "Initial puzzle:\n";
@@ -261,11 +352,11 @@ int main (int argc, char* argv[]) {
             std::cout << "No solution found.\n";
             return EXIT_FAILURE;
         }
-        if (!EXPERIMENTAL_MODE)
+        if (SOLVE_PUZZLE)
         {
             std::cout << "Solved puzzle:\n";
             numberlink.printPuzzle();     
-            return EXIT_SUCCESS;   
+            //return EXIT_SUCCESS;   
         }
         numberPairs.clear();
         timer.end();
