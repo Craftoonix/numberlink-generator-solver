@@ -74,7 +74,7 @@ bool heuristics::parity()
     }
     minCellsOccupied -= p->numPairs;
 
-    return ((availableCells - minCellsOccupied) % 2 == totalCells % 2);
+    return !((availableCells - minCellsOccupied) % 2);
 }
 
 bool heuristics::checkBlockades()
