@@ -161,6 +161,7 @@ int main (int argc, char* argv[]) {
     u_int16_t args[100 * MAX_CELLS * MAX_CELLS];
     //create vector of pairs of coordinates of numbers
     std::vector<numberpairs_t> puzzleConfigs;// numberpairs_t numberPairs;
+    ExperimentTimer timer;
 
 
     // parse command line options
@@ -287,6 +288,8 @@ int main (int argc, char* argv[]) {
                     
                     // check if it is solvable and redo if not
                     gen.solve(numberlink,width,height,nPairs);
+                    std::cout << "\033[F\033[\033[F\033[K\033[F\033[K" <<std::flush;
+                    std::cout << "generating " << I << " out of " << N << " " << width << "x" << height << " with " << nPairs << " pairs" << std::endl;
                     if (numberlink.isSolved()) {
                         puzzleConfigs.push_back(numberPairs); // store coordinates
                         // output to output file
@@ -321,8 +324,6 @@ int main (int argc, char* argv[]) {
         }
     } // if not generate
         
-        
-    ExperimentTimer timer;
     for (size_t E = 0; E < N; E++)
     {
         timer.start();
