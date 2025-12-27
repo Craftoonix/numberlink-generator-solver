@@ -47,3 +47,4 @@
 numberlink
 *.cnf
 output.*
+generate_puzzles.bash
