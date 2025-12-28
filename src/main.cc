@@ -165,7 +165,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:n:g:r:o:hif:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:n:g:r:o:heif:")) != -1) 
     {
         switch (opt)
         {
@@ -212,9 +212,11 @@ int main (int argc, char* argv[]) {
             }
             break;
         case 'n':
+            N = atoi(optarg);
+            break;
+        case 'e':
             // experiments mode
             EXPERIMENTAL_MODE = true;
-            N = atoi(optarg);
             break;
         case '?':
             std::cerr << "Unknown option: " << char(optopt) << std::endl;
@@ -353,7 +355,7 @@ int main (int argc, char* argv[]) {
             std::cout << "No solution found.\n";
             return EXIT_FAILURE;
         }
-        if (SOLVE_PUZZLE)
+        if (SOLVE_PUZZLE && !EXPERIMENTAL_MODE)
         {
             std::cout << "Solved puzzle:\n";
             numberlink.printPuzzle();     
