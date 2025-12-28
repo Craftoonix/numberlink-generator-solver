@@ -59,14 +59,27 @@ size8/ output.txt
 The x coordinate represents the row the number is in and increases every row to the right
 The y coordinate represents the collumn the number is in and increases every collumn downwards
 size8/ pairs2.txt
->1m
 
-size8/ pairs9.txt
-Summary: 7.9351e-05s - 0.947509s, mean 0.086023s +/- 0.175046 (N=100)
+size8/ pairs3.txt
+Summary: 1.7515e-05s - 4579.29s, mean 238.686s +/- 606.45 (N=100)
+
+size8/ pairs4.txt
+Summary: 4.7398e-05s - 1263.64s, mean 58.6115s +/- 144.221 (N=100)
+
+size8/ pairs5.txt
+Summary: 0.000727032s - 617.69s, mean 33.1826s +/- 75.0171 (N=100)
+
+size8/ pairs6.txt
+Summary: 1.264e-05s - 96.2693s, mean 4.75788s +/- 11.9667 (N=100)
+
+size8/ pairs7.txt
+Summary: 6.038e-05s - 11.1968s, mean 0.467948s +/- 1.30469 (N=100)
 
 size8/ pairs8.txt
 Summary: 6.038e-05s - 11.1968s, mean 0.467948s +/- 1.30469 (N=100)
 
-size8/ pairs7.txt
-Summary: 6.038e-05s - 11.1968s, mean 0.467948s +/- 1.30469 (N=100)Summary: 1.264e-05s - 96.2693s, mean 4.75788s +/- 11.9667 (N=100)
+size8/ pairs9.txt
+Summary: 7.9351e-05s - 0.947509s, mean 0.086023s +/- 0.175046 (N=100)
+
+Summary: 0.0139743s - 2153.99s, mean 138.266s +/- 372.539 (N=100)
 
