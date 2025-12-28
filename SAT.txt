@@ -1,0 +1,126 @@
+size10/ pairs2.txt
+Summary: 0.00396733s - 0.0130719s, mean 0.00499597s +/- 0.00112446 (N=100)
+
+size10/ pairs3.txt
+Summary: 0.0053665s - 0.0239198s, mean 0.00711194s +/- 0.00285154 (N=100)
+
+size10/ pairs4.txt
+Summary: 0.00637505s - 0.059807s, mean 0.0105608s +/- 0.00776344 (N=100)
+
+size10/ pairs5.txt
+Summary: 0.010355s - 0.135399s, mean 0.0189837s +/- 0.013794 (N=100)
+
+size10/ pairs6.txt
+Summary: 0.0177386s - 0.127903s, mean 0.0298593s +/- 0.0152462 (N=100)
+
+size10/ pairs7.txt
+Summary: 0.0355934s - 0.103235s, mean 0.0472197s +/- 0.0129679 (N=100)
+
+size10/ pairs8.txt
+Summary: 0.0867771s - 0.284976s, mean 0.109002s +/- 0.028416 (N=100)
+
+size10/ pairs9.txt
+Summary: 0.237401s - 0.378451s, mean 0.268406s +/- 0.0266916 (N=100)
+
+size5/ pairs2.txt
+Summary: 0.0021206s - 0.00506248s, mean 0.00242098s +/- 0.000295297 (N=100)
+
+size5/ pairs3.txt
+Summary: 0.00226948s - 0.00392864s, mean 0.00269071s +/- 0.000240925 (N=100)
+
+size5/ pairs4.txt
+Summary: 0.00246228s - 0.00340003s, mean 0.00286882s +/- 0.000185183 (N=100)
+
+size5/ pairs5.txt
+Summary: 0.00306627s - 0.00422372s, mean 0.00356568s +/- 0.000260312 (N=100)
+
+size5/ pairs6.txt
+Summary: 0.0047222s - 0.00619971s, mean 0.00539767s +/- 0.000306986 (N=100)
+
+size6/ pairs2.txt
+Summary: 0.00236651s - 0.00334329s, mean 0.0027079s +/- 0.000173299 (N=100)
+
+size6/ pairs3.txt
+Summary: 0.00274303s - 0.00379847s, mean 0.00314746s +/- 0.000198432 (N=100)
+
+size6/ pairs4.txt
+Summary: 0.00291961s - 0.00662493s, mean 0.00359259s +/- 0.000607713 (N=100)
+
+size6/ pairs5.txt
+Summary: 0.00404707s - 0.00782544s, mean 0.00482206s +/- 0.000476793 (N=100)
+
+size6/ pairs6.txt
+Summary: 0.00635235s - 0.00926943s, mean 0.00732162s +/- 0.000504573 (N=100)
+
+size6/ pairs7.txt
+Summary: 0.011786s - 0.0155906s, mean 0.01341s +/- 0.000824131 (N=100)
+
+size7/ pairs2.txt
+Summary: 0.00269142s - 0.00407574s, mean 0.00306261s +/- 0.000226925 (N=100)
+
+size7/ pairs3.txt
+Summary: 0.0032236s - 0.00456071s, mean 0.00369012s +/- 0.000267286 (N=100)
+
+size7/ pairs4.txt
+Summary: 0.00367497s - 0.00532839s, mean 0.00417516s +/- 0.00031967 (N=100)
+
+size7/ pairs5.txt
+Summary: 0.00512803s - 0.00721465s, mean 0.00581152s +/- 0.000345961 (N=100)
+
+size7/ pairs6.txt
+Summary: 0.008499s - 0.0136701s, mean 0.0105689s +/- 0.00117359 (N=100)
+
+size7/ pairs7.txt
+Summary: 0.0172599s - 0.0262542s, mean 0.0205554s +/- 0.002209 (N=100)
+
+size7/ pairs8.txt
+Summary: 0.0351612s - 0.0455065s, mean 0.041036s +/- 0.00210094 (N=100)
+
+size8/ pairs2.txt
+Summary: 0.00300165s - 0.00415124s, mean 0.00356156s +/- 0.000296116 (N=100)
+
+size8/ pairs3.txt
+Summary: 0.00370806s - 0.00819525s, mean 0.00454364s +/- 0.000643854 (N=100)
+
+size8/ pairs4.txt
+Summary: 0.00467364s - 0.0114035s, mean 0.00548455s +/- 0.000757268 (N=100)
+
+size8/ pairs5.txt
+Summary: 0.00640687s - 0.0142816s, mean 0.00764603s +/- 0.00110665 (N=100)
+
+size8/ pairs6.txt
+Summary: 0.0111466s - 0.0180047s, mean 0.0126773s +/- 0.00112793 (N=100)
+
+size8/ pairs7.txt
+Summary: 0.0221232s - 0.0272054s, mean 0.0242669s +/- 0.0011744 (N=100)
+
+size8/ pairs8.txt
+Summary: 0.0993436s - 0.148732s, mean 0.118267s +/- 0.0097416 (N=100)
+
+size8/ pairs9.txt
+Summary: 0.132206s - 0.179657s, mean 0.150447s +/- 0.0103114 (N=100)
+
+size9/ pairs2.txt
+Summary: 0.00357561s - 0.0102057s, mean 0.00452974s +/- 0.00103216 (N=100)
+
+size9/ pairs3.txt
+Summary: 0.00505551s - 0.0130354s, mean 0.00642633s +/- 0.00134468 (N=100)
+
+size9/ pairs4.txt
+Summary: 0.00613927s - 0.0173444s, mean 0.00802674s +/- 0.00185919 (N=100)
+
+size9/ pairs5.txt
+Summary: 0.00809159s - 0.0289624s, mean 0.010686s +/- 0.00314613 (N=100)
+
+size9/ pairs6.txt
+Summary: 0.0140341s - 0.0284631s, mean 0.0170575s +/- 0.00289564 (N=100)
+
+size9/ pairs7.txt
+Summary: 0.031794s - 0.052755s, mean 0.0365989s +/- 0.00359594 (N=100)
+
+size9/ pairs8.txt
+Summary: 0.0663794s - 0.0955035s, mean 0.0757872s +/- 0.00645058 (N=100)
+
+size9/ pairs9.txt
+Summary: 0.173107s - 0.232918s, mean 0.192992s +/- 0.0103924 (N=100)
+

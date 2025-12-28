@@ -1,0 +1,72 @@
+size5/ pairs2.txt
+Summary: 8.9e-07s - 0.000237971s, mean 2.60711e-05s +/- 4.51432e-05 (N=100)
+
+size5/ pairs3.txt
+Summary: 9.8e-07s - 9.886e-05s, mean 1.79982e-05s +/- 1.85695e-05 (N=100)
+
+size5/ pairs4.txt
+Summary: 1.06e-06s - 3.9651e-05s, mean 8.65294e-06s +/- 7.1225e-06 (N=100)
+
+size5/ pairs5.txt
+Summary: 1.06e-06s - 2.06e-05s, mean 5.49683e-06s +/- 4.36656e-06 (N=100)
+
+size5/ pairs6.txt
+Summary: 1.1e-06s - 2.336e-05s, mean 3.23062e-06s +/- 2.56445e-06 (N=100)
+
+size6/ pairs2.txt
+Summary: 1.39e-06s - 0.070458s, mean 0.00564896s +/- 0.0110857 (N=100)
+
+size6/ pairs3.txt
+Summary: 1.52e-06s - 0.0123623s, mean 0.0013516s +/- 0.00198673 (N=100)
+
+size6/ pairs4.txt
+Summary: 2.33e-06s - 0.0056781s, mean 0.000466972s +/- 0.000737805 (N=100)
+
+size6/ pairs5.txt
+Summary: 1.73e-06s - 0.00158708s, mean 0.000151329s +/- 0.000261371 (N=100)
+
+size6/ pairs6.txt
+Summary: 1.95e-06s - 0.000537653s, mean 7.25511e-05s +/- 9.8939e-05 (N=100)
+
+size6/ pairs7.txt
+Summary: 1.78e-06s - 0.000597663s, mean 3.26621e-05s +/- 6.67123e-05 (N=100)
+
+size7/ output.txt
+The x coordinate represents the row the number is in and increases every row to the right
+The y coordinate represents the collumn the number is in and increases every collumn downwards
+size7/ pairs2.txt
+Summary: 3.73e-06s - 17.7477s, mean 0.931081s +/- 2.67694 (N=100)
+
+size7/ pairs3.txt
+Summary: 3.4e-06s - 7.77813s, mean 0.431943s +/- 1.03351 (N=100)
+
+size7/ pairs4.txt
+Summary: 4.29e-06s - 0.886871s, mean 0.0863356s +/- 0.138593 (N=100)
+
+size7/ pairs5.txt
+Summary: 3.861e-06s - 0.271853s, mean 0.0229707s +/- 0.036463 (N=100)
+
+size7/ pairs6.txt
+Summary: 3.46e-06s - 0.0917553s, mean 0.00992129s +/- 0.0152567 (N=100)
+
+size7/ pairs7.txt
+Summary: 2.83e-06s - 0.0414685s, mean 0.00369262s +/- 0.00626743 (N=100)
+
+size7/ pairs8.txt
+Summary: 3.79e-06s - 0.0135011s, mean 0.000943456s +/- 0.00185599 (N=100)
+
+size8/ output.txt
+The x coordinate represents the row the number is in and increases every row to the right
+The y coordinate represents the collumn the number is in and increases every collumn downwards
+size8/ pairs2.txt
+>1m
+
+size8/ pairs9.txt
+Summary: 7.9351e-05s - 0.947509s, mean 0.086023s +/- 0.175046 (N=100)
+
+size8/ pairs8.txt
+Summary: 6.038e-05s - 11.1968s, mean 0.467948s +/- 1.30469 (N=100)
+
+size8/ pairs7.txt
+Summary: 6.038e-05s - 11.1968s, mean 0.467948s +/- 1.30469 (N=100)Summary: 1.264e-05s - 96.2693s, mean 4.75788s +/- 11.9667 (N=100)
+
