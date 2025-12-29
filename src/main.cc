@@ -290,7 +290,7 @@ int main (int argc, char* argv[]) {
                     
                     // check if it is solvable and redo if not
                     gen.solve(numberlink,width,height,nPairs);
-                    std::cout << "\033[F\033[\033[F\033[K\033[F\033[K" <<std::flush;
+                    std::cout << "\033[F\033[\033[F\033[K\033[F\033[K\033[F\033[K" <<std::flush;
                     std::cout << "generating " << I << " out of " << N << " " << width << "x" << height << " with " << nPairs << " pairs" << std::endl;
                     if (numberlink.isSolved()) {
                         puzzleConfigs.push_back(numberPairs); // store coordinates
@@ -338,7 +338,7 @@ int main (int argc, char* argv[]) {
             numberlink.printPuzzle();
             std::cout << std::endl;
         }
-        if (!SOLVE_PUZZLE) {
+        if (!SOLVE_PUZZLE && !EXPERIMENTAL_MODE) {
             return EXIT_SUCCESS; // nothing more to do
         }
     
