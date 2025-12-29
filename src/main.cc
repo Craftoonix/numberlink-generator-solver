@@ -270,7 +270,7 @@ int main (int argc, char* argv[]) {
             if (USE_OUTPUT_FILE) outputfile.open(OUTPUT_FILE);
             for (size_t I = 0; I < N; I++)
             {
-                
+                timer.start();
                 while (true)
                 {
                     // generate a puzzle
@@ -311,6 +311,7 @@ int main (int argc, char* argv[]) {
                         break;
                     }
                 }
+                timer.end();
             }
             if (USE_OUTPUT_FILE) outputfile.close();
         }
