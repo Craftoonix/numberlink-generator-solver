@@ -327,7 +327,7 @@ int main (int argc, char* argv[]) {
         }
     } // if not generate
         
-    for (size_t E = 0; E < N; E++)
+    for (size_t E = 0; E < N && SOLVE_PUZZLE; E++)
     {
         timer.start();
         numberpairs_t numberPairs = puzzleConfigs.at(E);
