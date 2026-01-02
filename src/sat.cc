@@ -127,7 +127,7 @@ void sat::solve(ThePuzzle& p, u_int8_t width, u_int8_t height, u_int8_t nPairs)
     generateCNF(p,width,height); //convert puzzle to CNF
 
     // call minisat to determine what literals satisfy the puzzle
-    system("/usr/bin/minisat -verb=0 numberlink.cnf output.txt");
+    system("/usr/bin/minisat -verb=0 numberlink.cnf output.txt 2>/dev/null");
     
     decode(p);  // decode the literals
 }
