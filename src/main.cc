@@ -165,7 +165,7 @@ int main (int argc, char* argv[]) {
 
 
     // parse command line options
-    while ((opt = getopt(argc, argv, ":s:n:g:r:o:heif:")) != -1) 
+    while ((opt = getopt(argc, argv, ":s:n:g:r:o:h:eif:")) != -1) 
     {
         switch (opt)
         {
@@ -187,6 +187,9 @@ int main (int argc, char* argv[]) {
             break;
         case 'h':
             USE_HEURISTICS = true;
+            ENABLED_HEURISTICS = atoi(optarg);
+            if (ENABLED_HEURISTICS > 3) 
+                std::cerr << "WARNING: unknown heuristic\n";
             break;
         case 'f':
             INPUT_FILE = optarg;
@@ -283,14 +286,14 @@ int main (int argc, char* argv[]) {
                         heuristics heur;               
                         heur.setPuzzle(&numberlink);
                         
-                        if (!heur.isSolvable()){
+                        if (!heur.isSolvable(ENABLED_HEURISTICS)){
                             continue;
                         }
                     }
                     
                     // check if it is solvable and redo if not
                     gen.solve(numberlink,width,height,nPairs);
-                    std::cout << "\033[F\033[\033[F\033[K\033[F\033[K\033[F\033[K" <<std::flush;
+                    //std::cout << "\033[F\033[\033[F\033[K\033[F\033[K\033[F\033[K" <<std::flush;
                     std::cout << "generating " << I << " out of " << N << " " << width << "x" << height << " with " << nPairs << " pairs" << std::endl;
                     if (numberlink.isSolved()) {
                         puzzleConfigs.push_back(numberPairs); // store coordinates
@@ -317,6 +320,7 @@ int main (int argc, char* argv[]) {
         }
     }
     else {
+        // check validity of puzzle configuration
         if (USE_INPUT_FILE) {
             if (!parsePuzzleConfigFile(nArgs,args,width,height,puzzleConfigs))
                 return EXIT_FAILURE;
@@ -327,7 +331,7 @@ int main (int argc, char* argv[]) {
         }
     } // if not generate
         
-    for (size_t E = 0; E < N && SOLVE_PUZZLE; E++)
+    for (size_t E = 0; E < N && (SOLVE_PUZZLE || SHOW_INITIAL_PUZZLE); E++)
     {
         timer.start();
         numberpairs_t numberPairs = puzzleConfigs.at(E);
@@ -366,12 +370,12 @@ int main (int argc, char* argv[]) {
         timer.end();
     }
 
+    // output experimental data
     if (EXPERIMENTAL_MODE)
     {
         timer.printStatisticsCSV(std::cout);
         timer.printStatistics(std::cout);
     }
-
     
     return EXIT_SUCCESS;
 }//main

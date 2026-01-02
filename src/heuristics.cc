@@ -17,11 +17,11 @@ void heuristics::setPuzzle(ThePuzzle* puzzle)
     p = puzzle;
 }
 
-bool heuristics::isSolvable()
+bool heuristics::isSolvable(u_int16_t actives)
 {
-    if (checkBlockades())
+    if ((actives & 1) && checkBlockades())
         return false;
-    if (!parity())   
+    if (((actives & 0b10) >> 1) && !parity())   
         return false; 
     return true;
 }
