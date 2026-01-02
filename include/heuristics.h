@@ -12,10 +12,11 @@ class heuristics
         /**
          * @brief Checks if the puzzle is solvable using the heuristics
          * 
+         * @param actives the enabled heuristics
          * @return true the puzzle can still be solvable
          * @return false the puzzle is not solvable
          */
-        bool isSolvable();
+        bool isSolvable(u_int16_t actives);
 
         /**
          * @brief Set the Puzzle object
