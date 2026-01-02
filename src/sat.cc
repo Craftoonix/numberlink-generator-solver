@@ -162,21 +162,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             // has 2 lines going Denoting corresponding logic in CNF.
             // (1 or 2 True out of 2, 3 or 4 literals).
             if (current->number > 0) {           
-                switch (nLines)
-                {
-                case 2: // 1 true out of 2 lines
-                    commitLiterals(lineLiterals, cnf, SIGNED);
-                    commitLiterals(lineLiterals, cnf, UNSIGNED);
-                    break;
-                case 3: // 1 true out of 3 lines
-                    doCombinations(lineLiterals, 2, cnf, SIGNED);
-                    commitLiterals(lineLiterals, cnf, UNSIGNED);
-                    break;
-                case 4: // 1 true out of 4 lines
-                    doCombinations(lineLiterals, 2, cnf, SIGNED);
-                    commitLiterals(lineLiterals, cnf, UNSIGNED);
-                    break;
-                } 
+                doCombinations(lineLiterals, 2, cnf, SIGNED);
+                commitLiterals(lineLiterals, cnf, UNSIGNED);
             } // if number
             else {
                 switch (nLines)
