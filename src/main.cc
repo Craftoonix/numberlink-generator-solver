@@ -163,7 +163,6 @@ int main (int argc, char* argv[]) {
     std::vector<numberpairs_t> puzzleConfigs;// numberpairs_t numberPairs;
     ExperimentTimer timer;
 
-
     // parse command line options
     while ((opt = getopt(argc, argv, ":s:n:g:r:o:h:eif:")) != -1) 
     {
@@ -326,6 +325,8 @@ int main (int argc, char* argv[]) {
                 return EXIT_FAILURE;
         }
         else {
+            numberpairs_t firstPuzzle;
+            puzzleConfigs.push_back(firstPuzzle);
             if (!parsePuzzleConfig(nArgs, argv, width, height,puzzleConfigs.at(0)))
                 return EXIT_FAILURE;
         }
@@ -335,7 +336,6 @@ int main (int argc, char* argv[]) {
     {
         timer.start();
         numberpairs_t numberPairs = puzzleConfigs.at(E);
-
         ThePuzzle numberlink((u_int16_t)width, u_int16_t(height), numberPairs);
         if (SHOW_INITIAL_PUZZLE) {
             std::cout << "Initial puzzle:\n";

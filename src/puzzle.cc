@@ -40,7 +40,6 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         u_int16_t y2 = p.second.second;
         Cell* assigner1 = findCell(x1, y1);
         Cell* assigner2 = findCell(x2, y2);
-        
         assigner1->number = counter;
         assigner2->number = counter;
 
@@ -49,6 +48,7 @@ ThePuzzle::ThePuzzle(u_int16_t w, u_int16_t h,
         assigner2->setFixed();
     }
     numPairs = counter;
+    
 }//ThePuzzle
 
 // destructor
@@ -67,49 +67,81 @@ void ThePuzzle::createGrid()
         size_t x = 0;
         if (y != 0) {
             HVconnector = Vconnector;
+            u_int16_t up, down;
+            if (y % 2) {
+                up   = (int)Direction::LEFTUP;
+                down = (int)Direction::RIGHTDOWN;
+            }
+            else {
+                up   = (int)Direction::RIGHTUP;
+                down = (int)Direction::LEFTDOWN;
+            }
 
             // Create a cell downwards
-            Vconnector->adjacent[DOWN] = new Cell(x,y);
-            Vconnector->lines[DOWN] = new Line();
-            Vconnector->lines[DOWN]->to[DOWN] = Vconnector->adjacent[DOWN];
+            Vconnector->adjacent[down] = new Cell(x,y);
+            Vconnector->lines[down] = new Line();
+            Vconnector->lines[down]->to[down] = Vconnector->adjacent[down];
 
             // Connect it with the cell upwards
-            Vconnector->adjacent[DOWN]->adjacent[UP] = Vconnector;
-            Vconnector->adjacent[DOWN]->lines[UP] = Vconnector->lines[DOWN];
-            Vconnector->adjacent[DOWN]->lines[UP]->to[UP] = Vconnector;
+            Vconnector->adjacent[down]->adjacent[up] = Vconnector;
+            Vconnector->adjacent[down]->lines[up] = Vconnector->lines[down];
+            Vconnector->adjacent[down]->lines[up]->to[up] = Vconnector;
 
             // Move help pointers down
-            Vconnector = Vconnector->adjacent[DOWN];
+            Vconnector = Vconnector->adjacent[down];
             Hconnector = Vconnector;
         }
         for (; x < width; x++) {
             if (x == 0) continue; // skip the first cell
 
-            // Create a cell to the right
-            Hconnector->adjacent[RIGHT] = new Cell(x,y);
-            Hconnector->lines[RIGHT] = new Line();
-            Hconnector->lines[RIGHT]->to[RIGHT] = Hconnector->adjacent[RIGHT];
+            // Create a cell to the (int)Direction::RIGHT
+            Hconnector->adjacent[(int)Direction::RIGHT] = new Cell(x,y);
+            Hconnector->lines[(int)Direction::RIGHT] = new Line();
+            Hconnector->lines[(int)Direction::RIGHT]->to[(int)Direction::RIGHT] = Hconnector->adjacent[(int)Direction::RIGHT];
 
-            // Connect it with the cell to the left
-            Hconnector->adjacent[RIGHT]->adjacent[LEFT] = Hconnector;
-            Hconnector->adjacent[RIGHT]->lines[LEFT] = Hconnector->lines[RIGHT];
-            Hconnector->lines[RIGHT]->to[LEFT] = Hconnector;
+            // Connect it with the cell to the (int)Direction::LEFT
+            Hconnector->adjacent[(int)Direction::RIGHT]->adjacent[(int)Direction::LEFT] = Hconnector;
+            Hconnector->adjacent[(int)Direction::RIGHT]->lines[(int)Direction::LEFT] = Hconnector->lines[(int)Direction::RIGHT];
+            Hconnector->lines[(int)Direction::RIGHT]->to[(int)Direction::LEFT] = Hconnector;
 
-            // Move helper pointer to the right
-            Hconnector = Hconnector->adjacent[RIGHT];
+            // Move helper pointer to the (int)Direction::RIGHT
+            Hconnector = Hconnector->adjacent[(int)Direction::RIGHT];
 
             if (y == 0) continue; // skip the first row
 
-            // Move helper pointer to the right
-            HVconnector = HVconnector->adjacent[RIGHT];
+            // Move helper pointer to the (int)Direction::RIGHT
+            HVconnector = HVconnector->adjacent[(int)Direction::RIGHT];
 
             // Connect cells up and down with eachother
-            Hconnector->adjacent[UP] = HVconnector;
-            HVconnector->adjacent[DOWN] = Hconnector;
-            Hconnector->lines[UP] = new Line();
-            HVconnector->lines[DOWN] = Hconnector->lines[UP];
-            Hconnector->lines[UP]->to[UP] = HVconnector;
-            Hconnector->lines[UP]->to[DOWN] = Hconnector;
+            if (y % 2)
+            {
+                Hconnector->adjacent[(int)Direction::LEFTUP] = HVconnector;
+                HVconnector->adjacent[(int)Direction::RIGHTDOWN] = Hconnector;
+                Hconnector->lines[(int)Direction::LEFTUP] = new Line();
+                HVconnector->lines[(int)Direction::RIGHTDOWN] = Hconnector->lines[(int)Direction::LEFTUP];
+                Hconnector->lines[(int)Direction::LEFTUP]->to[(int)Direction::LEFTUP] = HVconnector;
+                Hconnector->lines[(int)Direction::LEFTUP]->to[(int)Direction::RIGHTDOWN] = Hconnector;
+                HVconnector->adjacent[(int)Direction::RIGHTDOWN] = Hconnector->adjacent[(int)Direction::LEFT];
+                Hconnector->adjacent[(int)Direction::LEFT]->adjacent[(int)Direction::RIGHTUP] = HVconnector;
+                HVconnector->lines[(int)Direction::LEFTDOWN] = new Line();
+                HVconnector->lines[(int)Direction::LEFTDOWN]->to[(int)Direction::RIGHTUP] = HVconnector; 
+                HVconnector->lines[(int)Direction::LEFTDOWN]->to[(int)Direction::LEFTDOWN] = Hconnector->adjacent[(int)Direction::LEFT];
+                Hconnector->adjacent[(int)Direction::LEFT]->lines[(int)Direction::RIGHTUP] = HVconnector->lines[(int)Direction::LEFTDOWN];
+            }
+            else {
+                Hconnector->adjacent[(int)Direction::RIGHTUP] = HVconnector;
+                HVconnector->adjacent[(int)Direction::LEFTDOWN] = Hconnector;
+                Hconnector->lines[(int)Direction::RIGHTUP] = new Line();
+                HVconnector->lines[(int)Direction::LEFTDOWN] = Hconnector->lines[(int)Direction::RIGHTUP];
+                Hconnector->lines[(int)Direction::RIGHTUP]->to[(int)Direction::RIGHTUP] = HVconnector;
+                Hconnector->lines[(int)Direction::RIGHTUP]->to[(int)Direction::LEFTDOWN] = Hconnector;
+                HVconnector->adjacent[(int)Direction::LEFT]->adjacent[(int)Direction::RIGHTDOWN] = Hconnector;
+                Hconnector->adjacent[(int)Direction::LEFTUP] = HVconnector->adjacent[(int)Direction::LEFT];
+                Hconnector->lines[(int)Direction::LEFTUP] = new Line();
+                Hconnector->lines[(int)Direction::LEFTUP]->to[(int)Direction::LEFTUP] = HVconnector->adjacent[(int)Direction::LEFT];
+                Hconnector->lines[(int)Direction::LEFTUP]->to[(int)Direction::RIGHTDOWN] = Hconnector;
+                HVconnector->adjacent[(int)Direction::LEFT]->lines[(int)Direction::RIGHTDOWN] = Hconnector->lines[(int)Direction::LEFTUP];
+            }
         } // for x  
     } // for y
 } // ThePuzzle::createGrid
@@ -131,57 +163,118 @@ void ThePuzzle::printPuzzle()
 {
     Cell* Hprinter = in;
     Cell* Vprinter = in;
+    Cell* HVprinter = in;
     // Print the grid
 
+    for (size_t j = 0; j < width; j++) {
+        std::cout << " / \\";
+    }
+    std::cout << std::endl;
     for (size_t i = 0; i < height; i++)
     {
+        HVprinter = Hprinter;
+        if (i % 2) std::cout << "  ";
         for (size_t j = 0; j < width; j++) {
-            if (i > 0 && Hprinter->lines[UP]->connected)
-                std::cout << "+X";
-            else std::cout << "+-";
-            Hprinter = Hprinter->adjacent[RIGHT];
-        }
-        Hprinter = Vprinter;
-        std::cout << "+" << std::endl;
-        for (size_t j = 0; j < width; j++) {
-            if (j > 0 && Hprinter->lines[LEFT]->connected)
-                std::cout << "X" << getChar(Hprinter->number);
-            else std::cout << "|" << getChar(Hprinter->number);
-            Hprinter = Hprinter->adjacent[RIGHT];
+            if (j > 0 && Hprinter->lines[(int)Direction::LEFT]->connected)
+                std::cout << "X ";
+            else {
+                std::cout << "| ";
+            }
+            std::cout << Hprinter->number << " ";
+            Hprinter = Hprinter->adjacent[(int)Direction::RIGHT];
         }
         std::cout << "|" << std::endl;
-        Vprinter = Vprinter->adjacent[DOWN];
+
+        if (i % 2) {
+            if (i < (size_t)height - 1)
+                std::cout << " /";
+            else {std::cout << "  ";};
+        }
+        for (size_t j = 0; j < width; j++) {
+            if (i < (size_t)height - 1) {
+                if ((i % 2)){
+                    if (HVprinter->lines[(int)Direction::LEFTDOWN]->connected)
+                        std::cout << " X";
+                    else std::cout << " \\";
+                    if ((j < (size_t)width - 1) && HVprinter->lines[(int)Direction::RIGHTDOWN]->connected)
+                        std::cout << " X";
+                    else std::cout << " /";
+                }
+                else {
+                    if (j > 0 && HVprinter->lines[(int)Direction::LEFTDOWN]->connected)
+                    std::cout << " X";
+                    else std::cout << " \\";
+                    if (HVprinter->lines[(int)Direction::RIGHTDOWN]->connected)
+                        std::cout << " X";
+                    else std::cout << " /";
+                }
+            }
+            else std::cout << " \\ /";
+            HVprinter = HVprinter->adjacent[(int)Direction::RIGHT];
+        }
+        if (!(i % 2) && (i < (size_t)height - 1)) std::cout << " \\";
+        std::cout << std::endl;
+
+        if (i % 2)
+            Vprinter = Vprinter->adjacent[(int)Direction::LEFTDOWN];
+        else
+            Vprinter = Vprinter->adjacent[(int)Direction::RIGHTDOWN];
         Hprinter = Vprinter;
+            // for (size_t j = 0; j < width; j++) {
+                //     if (i > 0 && Hprinter->lines[UP]->connected)
+                //         std::cout << "+X";
+                //     else std::cout << " / \\";
+                //     Hprinter = Hprinter->adjacent[(int)Direction::RIGHT];
+                // }
+
+       
+        // for (size_t j = 0; j < width; j++) {
+        //     if (j > 0 && Hprinter->lines[(int)Direction::LEFT]->connected)
+        //         std::cout << "X" << getChar(Hprinter->number);
+        //     else std::cout << "|" << getChar(Hprinter->number);
+        //     Hprinter = Hprinter->adjacent[(int)Direction::RIGHT];
+        // }
+        // std::cout << "|" << std::endl;
+        // Hprinter = Vprinter;
     }
-    for (size_t j = 0; j < width; j++) {
-        std::cout << "+-";
-    }
-    std::cout << "+" << std::endl;
+    // for (size_t j = 0; j < width; j++) {
+    //     std::cout << "+-";
+    // }
+    // std::cout << "+" << std::endl;
 }
 
 void ThePuzzle::deletePuzzle()
 {
     // delete all cells and liens
     Cell* Vdeletor = in;
-    Cell* Hdeletor = Vdeletor->adjacent[RIGHT];
+    Cell* Hdeletor = Vdeletor->adjacent[(int)Direction::RIGHT];
     for (size_t i = 0; i < height; i++) {
         if (i != 0) {
-            delete Vdeletor->lines[RIGHT];
-            Vdeletor = Vdeletor->adjacent[DOWN];
-            delete Vdeletor->adjacent[UP];
-            delete Vdeletor->lines[UP];
-            Hdeletor = Vdeletor->adjacent[RIGHT];
+            delete Vdeletor->lines[(int)Direction::RIGHT];
+            if (i % 2) {
+                Vdeletor = Vdeletor->adjacent[(int)Direction::RIGHTDOWN];
+                delete Vdeletor->adjacent[(int)Direction::LEFTUP];
+                delete Vdeletor->lines[(int)Direction::LEFTUP];
+            }
+            else{
+                Vdeletor = Vdeletor->adjacent[(int)Direction::LEFTDOWN];
+                delete Vdeletor->adjacent[(int)Direction::RIGHTUP]; 
+            } 
+            delete Vdeletor->lines[(int)Direction::RIGHTUP];
+            Hdeletor = Vdeletor->adjacent[(int)Direction::RIGHT];
         }
         for (size_t j = 2; j <= width; j++) {
-            if (Hdeletor->lines[UP] != nullptr)
-                delete Hdeletor->lines[UP];
+            if (Hdeletor->lines[(int)Direction::LEFTUP] != nullptr)
+                delete Hdeletor->lines[(int)Direction::LEFTUP];
+            if (Hdeletor->lines[(int)Direction::RIGHTUP] != nullptr)
+                delete Hdeletor->lines[(int)Direction::RIGHTUP];
             if (j == width) { // last cell in the row
                 delete Hdeletor;
                 continue;
             }
-            Hdeletor = Hdeletor->adjacent[RIGHT];
-            delete Hdeletor->adjacent[LEFT];
-            delete Hdeletor->lines[LEFT];
+            Hdeletor = Hdeletor->adjacent[(int)Direction::RIGHT];
+            delete Hdeletor->adjacent[(int)Direction::LEFT];
+            delete Hdeletor->lines[(int)Direction::LEFT];
         }//for j  
     }//for i
     delete Vdeletor;    
@@ -213,10 +306,12 @@ Cell* ThePuzzle::findCell(u_int16_t x_coord, u_int16_t y_coord)
 
     Cell* finder = in;
     for (size_t i = 0; i < y_coord; i++) {
-        finder = finder->adjacent[DOWN];
+        if (i % 2)
+            finder = finder->adjacent[(int)Direction::LEFTDOWN];
+        else finder = finder->adjacent[(int)Direction::RIGHTDOWN];
     }
     for (size_t j = 0; j < x_coord; j++) {
-        finder = finder->adjacent[RIGHT];
+        finder = finder->adjacent[(int)Direction::RIGHT];
     }
 
     return finder; // return the found cell
@@ -243,11 +338,14 @@ bool dfs::solve(Cell* curr, Cell* otherPair, ThePuzzle &p, u_int16_t currPair)
         if (*curr->adjacent[dir] == *otherPair) { // found my other half
             curr->number = otherPair->number;
             curr->lines[dir]->connected = true;
+            //p.printPuzzle();
             
-            if (p.isSolved())
-                return true; // puzzle is solved 
-            if(currPair == p.numPairs)
+            if (p.isSolved()) 
+            return true; // puzzle is solved 
+            if(currPair == p.numPairs) {
+                curr->lines[dir]->connected = false;
                 continue; // all pairs are done but puzzle not solved, check other directions
+            }
             // switch to the next pair
             //p.switchFinder(currPair + 1, *curr, *otherPair);
 

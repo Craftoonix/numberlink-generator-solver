@@ -71,7 +71,7 @@ class ThePuzzle {
          * @return The number of edges
          */
         size_t getNumEdges() const {
-            return ((width - 1) * height) + ((height - 1) * width);
+            return ((width - 1) * height) + ((height - 1) * width + (height - 1) * (width - 1));
         }
 
         

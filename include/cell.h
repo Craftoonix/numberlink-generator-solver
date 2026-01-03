@@ -23,7 +23,9 @@ class Line
  * @brief Cardinal Directions of a cell
  * 
  */
-enum Direction {UP, RIGHT, DOWN, LEFT, NOP};
+enum class Direction {RIGHTUP, RIGHT, RIGHTDOWN, LEFTDOWN, LEFT, LEFTUP, NOP};
+
+enum class VertexDirection {LEFT, RIGHT, STRAIGHT};
 
 /**
  * @brief The Cell class represents a cell in the puzzle

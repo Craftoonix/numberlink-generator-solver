@@ -15,19 +15,26 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
         while(assigner != nullptr)
         {
 
-            if (assigner->adjacent[UP] != nullptr) {
-                lit.vl.push_back(std::make_tuple(assigner->x,assigner->y-1,lit.totalLiterals++));
+            if (assigner->adjacent[(int)Direction::RIGHTUP] != nullptr) {
+                lit.pdl.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals++));
                 //lit.vb.push_back(std::make_tuple(assigner->x,assigner->y-1,lit.totalLiterals++));
             }
 
-            if (assigner->adjacent[RIGHT] != nullptr)
+            if (assigner->adjacent[(int)Direction::RIGHT] != nullptr)
             {
                 lit.hl.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals++));
                 //lit.hb.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals++));
             }
-            assigner = assigner->adjacent[RIGHT];
+            if (assigner->adjacent[(int)Direction::RIGHTDOWN] != nullptr)
+            {
+                lit.ndl.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals++));
+                //lit.hb.push_back(std::make_tuple(assigner->x,assigner->y,lit.totalLiterals++));
+            }
+            assigner = assigner->adjacent[(int)Direction::RIGHT];
         }
-        Vconnector = Vconnector->adjacent[DOWN];
+        if (Vconnector->adjacent[(int)Direction::LEFTDOWN]) Vconnector = Vconnector->adjacent[(int)Direction::LEFTDOWN];
+        else Vconnector = Vconnector->adjacent[(int)Direction::RIGHTDOWN];
+
         assigner = Vconnector;
     }
     
@@ -45,20 +52,33 @@ void sat::assignLiterals(u_int16_t width, u_int16_t height, u_int16_t nPairs, Th
     }  
 
     // assign vertex literals
-    for (u_int16_t y = 0; y <= height; y++)
+
+    for (uint16_t y = 0; y < height; y = y + height - 1)
     {
-        for (u_int16_t x = 0; x <= width; x++)
+        for (u_int16_t x = 0; x <= 2*width; x++)
         {
             u_int16_t vertexLiteral = lit.totalLiterals++;
             lit.r.push_back(std::make_tuple(x,y,vertexLiteral));
             if (x != 0)
-                lit.rd.push_back(std::make_tuple(vertexLiteral,LEFT,lit.totalLiterals++));
-            if (x != width)
-                lit.rd.push_back(std::make_tuple(vertexLiteral,RIGHT,lit.totalLiterals++));
-            if (y != 0)
-                lit.rd.push_back(std::make_tuple(vertexLiteral,UP,lit.totalLiterals++));
-            if (y != height)
-                lit.rd.push_back(std::make_tuple(vertexLiteral,DOWN,lit.totalLiterals++));
+                lit.rd.push_back(std::make_tuple(vertexLiteral,VertexDirection::LEFT,lit.totalLiterals++));
+            if (x != 2*width)
+                lit.rd.push_back(std::make_tuple(vertexLiteral,VertexDirection::RIGHT,lit.totalLiterals++));
+            if (!(x % 2))
+                lit.rd.push_back(std::make_tuple(vertexLiteral,VertexDirection::STRAIGHT,lit.totalLiterals++));
+            }
+        }
+        
+        for (u_int16_t y = 0; y < height - 1; y++)
+        {
+            for (u_int16_t x = 0; x <= 2 * width + 1; x++)
+            {
+            u_int16_t vertexLiteral = lit.totalLiterals++;
+            lit.r.push_back(std::make_tuple(x,y,vertexLiteral));
+            if (x != 0)
+                lit.rd.push_back(std::make_tuple(vertexLiteral,VertexDirection::LEFT,lit.totalLiterals++));
+            if (x != 2 * width + 1)
+                lit.rd.push_back(std::make_tuple(vertexLiteral,VertexDirection::RIGHT,lit.totalLiterals++));
+            lit.rd.push_back(std::make_tuple(vertexLiteral,VertexDirection::STRAIGHT,lit.totalLiterals++));
         }
     }
 }
@@ -99,12 +119,10 @@ bool sat::decode(ThePuzzle &p)
         // decode line literals
         if (literal <= (static_cast<int>(p.getNumEdges())))
         {
-            std::tuple<u_int16_t,u_int16_t,bool> coords;
+            std::tuple<u_int16_t,u_int16_t,u_int16_t> coords;
             coords = getLineCoordinate(literal);
             curr = p.findCell(std::get<0>(coords),std::get<1>(coords));
-            if (std::get<2>(coords))
-                curr->lines[RIGHT]->connected = true;
-            else curr->lines[DOWN]->connected = true;
+            curr->lines[std::get<2>(coords)]->connected = true;
             continue;
         }
         
@@ -146,14 +164,12 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
 
             // Gather all line literals connected to current cell
             std::vector<u_int16_t> lineLiterals;
-            if (x != 0)
-                lineLiterals.push_back(findLineLiteral(x-1, y, HORIZONTOAL));
             if (x != (width - 1))
-                lineLiterals.push_back(findLineLiteral(x, y, HORIZONTOAL));
-            if (y != 0)
-                lineLiterals.push_back(findLineLiteral(x, y-1, VERTICAL));
-            if (y != (height - 1))
-                lineLiterals.push_back(findLineLiteral(x, y, VERTICAL));
+                lineLiterals.push_back(findLineLiteral(x, y, horizontal));
+            if (y != (height - 2) && !(y % 2))
+                lineLiterals.push_back(findLineLiteral(x, y, negativeDiagonal));
+            if (y != 0 && (y % 2))
+                lineLiterals.push_back(findLineLiteral(x, y, positiveDiagonal));
 
             // Determine the amount of lines connected to cell
             u_int16_t nLines = lineLiterals.size();
@@ -235,15 +251,15 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
     // gp through each vertex
     for (u_int16_t y = 0; y <= height; y++)
     {
-        for (u_int16_t x = 0; x <= width; x++)
+        for (u_int16_t x = 0; x <= 2*width + 1; x++)
         {
             u_int16_t vertexLiteral = findVertexLiteral(x,y);
             std::vector<u_int16_t> VertexDirLiterals;
 
             // only 1 vertex directional literal per vertex no root
             if (x > 0 && x < width && y > 0 && y < height) {
-                for (size_t dir = 0; dir < MAX_DIRECTIONS; dir++)
-                    VertexDirLiterals.push_back(findVertexDirLiteral(vertexLiteral,static_cast<Direction>(dir)));
+                for (size_t dir = 0; dir < 3; dir++)
+                    VertexDirLiterals.push_back(findVertexDirLiteral(vertexLiteral,static_cast<VertexDirection>(dir)));
                 doCombinations(VertexDirLiterals,2,cnf,SIGNED);
                 commitLiterals(VertexDirLiterals,cnf,UNSIGNED);
             }
@@ -253,8 +269,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             if (x != width && x != 0 && y != 0)
             {
                 possibleLines.push_back(findLineLiteral(x-1,y-1,HORIZONTOAL));
-                possibleLines.push_back(findVertexDirLiteral(vertexLiteral,UP));
-                possibleLines.push_back(findVertexDirLiteral(findVertexLiteral(x,y-1),DOWN));
+                possibleLines.push_back(findVertexDirLiteral(vertexLiteral,VertexDirection::STRAIGHT));
+                //possibleLines.push_back(findVertexDirLiteral(findVertexLiteral(x,y-1),DOWN));
                 doCombinations(possibleLines,2,cnf,SIGNED);
             }
 
@@ -262,8 +278,8 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             {
                 possibleLines.clear();
                 possibleLines.push_back(findLineLiteral(x-1,y-1,VERTICAL));
-                possibleLines.push_back(findVertexDirLiteral(vertexLiteral,LEFT));
-                possibleLines.push_back(findVertexDirLiteral(findVertexLiteral(x-1,y),RIGHT));
+                //possibleLines.push_back(findVertexDirLiteral(vertexLiteral,(int)Direction::LEFT));
+                //possibleLines.push_back(findVertexDirLiteral(findVertexLiteral(x-1,y),(int)Direction::RIGHT));
                 doCombinations(possibleLines,2,cnf,SIGNED);
             }
         }
@@ -281,37 +297,38 @@ u_int16_t sat::findNumberLiteral(u_int16_t x, u_int16_t y, u_int16_t c)
     exit(EXIT_FAILURE);
 }
 
-u_int16_t sat::findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal)
+u_int16_t sat::findLineLiteral(u_int16_t x, u_int16_t y, u_int16_t slope)
 {
     // the line is horizontal
-    if (horizontal)
+    switch (slope)
     {
+    case positiveDiagonal:
+        for (auto tup : lit.pdl)
+            if (std::get<0>(tup) == x && std::get<1>(tup) == y)
+                return std::get<2>(tup);
+        break;
+    case horizontal:
         for (auto tup : lit.hl)
             if (std::get<0>(tup) == x && std::get<1>(tup) == y)
                 return std::get<2>(tup);
-        
-        exit(EXIT_FAILURE);
-    }
-
-    // the line is vertical
-    else
-    {
-        for (auto tup : lit.vl)
+        break;
+    case negativeDiagonal:
+        for (auto tup : lit.ndl)
             if (std::get<0>(tup) == x && std::get<1>(tup) == y)
                 return std::get<2>(tup);
-        exit(EXIT_FAILURE); 
-    }
+        break;
+    }    
     std::cerr << "WARNING (" << x << "," << y << ") does not contain a line literal" << std::endl;
-
+    exit(EXIT_FAILURE);
 }
 
-u_int16_t sat::findVertexDirLiteral(u_int16_t Vlit, Direction dir)
+u_int16_t sat::findVertexDirLiteral(u_int16_t Vlit, VertexDirection dir)
 {
     for (auto tup : lit.rd)
         if (std::get<0>(tup) == Vlit && std::get<1>(tup) == dir)
             return std::get<2>(tup);
-    std::cerr << "WARNING: The" << Vlit - lit.hl.size() - lit.vl.size() - lit.c.size() 
-              << "th literal does not contain a vertex direction literal in Direction" << dir << std::endl;
+    std::cerr << "WARNING: The" << Vlit - lit.hl.size() - lit.pdl.size() - lit.ndl.size() - lit.c.size() 
+              << "th literal does not contain a vertex direction literal in Direction" << (int)dir << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -338,7 +355,7 @@ std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getVertexLiteral(u_int16_t litera
     u_int16_t dir = 0;
     for (auto tup : lit.r)
         if (std::get<2>(tup) == literal)
-            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),NOP);
+            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),0);
     
     for (auto tup : lit.rd)
         if (std::get<2>(tup) == literal) {
@@ -355,16 +372,17 @@ std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getVertexLiteral(u_int16_t litera
     exit(EXIT_FAILURE);
 }
 
-std::tuple<u_int16_t,u_int16_t,bool> sat::getLineCoordinate(u_int16_t literal)
+std::tuple<u_int16_t,u_int16_t,u_int16_t> sat::getLineCoordinate(u_int16_t literal)
 {
+    for (auto tup : lit.pdl)
+        if (std::get<2>(tup) == literal)
+            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),positiveDiagonal);
     for (auto tup : lit.hl)
         if (std::get<2>(tup) == literal)
-            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),true);
-
-    for (auto tup : lit.vl)
+            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),horizontal);
+    for (auto tup : lit.ndl)
         if (std::get<2>(tup) == literal)
-            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),false);
-
+            return std::make_tuple(std::get<0>(tup),std::get<1>(tup),negativeDiagonal);
     exit(EXIT_FAILURE);
 }
 

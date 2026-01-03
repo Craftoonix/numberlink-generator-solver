@@ -19,15 +19,23 @@ class sat
          */
         struct literals
         {
-            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vl;          // (x,y.literal)
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> pdl;         // (x,y.literal)
             std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hl;          // (x,y,literal)
+            std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> ndl;         // (x,y,literal)
             std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t,u_int16_t>> c; // (x,y,number,literal)
             std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> vb;          
             std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> hb;  
             std::vector<std::tuple<u_int16_t,u_int16_t,u_int16_t>> r;           // (x',y',literal)
-            std::vector<std::tuple<u_int16_t,Direction,u_int16_t>> rd;          // (Vliteral, Direction, literal)
+            std::vector<std::tuple<u_int16_t,VertexDirection,u_int16_t>> rd;          // (Vliteral, Direction, literal)
             u_int16_t totalLiterals;
         } lit;
+
+        enum T_SLOPE
+        {
+            positiveDiagonal,
+            horizontal,
+            negativeDiagonal
+        };
 
         /**
          * @brief Assigns literals for each combination of numbers per cell
@@ -128,7 +136,7 @@ class sat
          * @param horizontal True: look up horizontal line, False: look up vertical line
          * @return The literal
          */
-        u_int16_t findLineLiteral(u_int16_t x, u_int16_t y, bool horizontal);
+        u_int16_t findLineLiteral(u_int16_t x, u_int16_t y, u_int16_t slope);
 
         /**
          * @brief Looks up the directional vertex literal given the vertex literal and direction
@@ -137,7 +145,7 @@ class sat
          * @param dir The direction
          * @return the literal
          */
-        u_int16_t findVertexDirLiteral(u_int16_t Vlit, Direction dir);
+        u_int16_t findVertexDirLiteral(u_int16_t Vlit, VertexDirection dir);
 
         /**
          * @brief Looks up the vertex literal given the x and y coordinate
@@ -171,7 +179,7 @@ class sat
          * @param literal The line literal
          * @return A tuple containing the line coordinates and whether the line is vertical or horizontal
          */
-        std::tuple<u_int16_t,u_int16_t,bool> getLineCoordinate(u_int16_t literal);
+        std::tuple<u_int16_t,u_int16_t,u_int16_t> getLineCoordinate(u_int16_t literal);
 
         std::tuple<u_int16_t,u_int16_t,u_int16_t> getVertexLiteral(u_int16_t literal);
         
