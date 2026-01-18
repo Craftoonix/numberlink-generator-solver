@@ -184,7 +184,7 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
             else {
                 switch (nLines)
                 {
-                case 2: // 2 true out of 2 lines
+                case 2: // 2 true out of 6 lines
                     commitLiteral(lineLiterals[0],cnf,UNSIGNED);
                     commitLiteral(lineLiterals[1],cnf,UNSIGNED);
                     //commitLiterals(lineLiterals, cnf, false, true);
@@ -195,6 +195,14 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
                     break;
                 case 4: // 2 true out of 4 lines
                     doCombinations(lineLiterals, 3, cnf, UNSIGNED);    
+                    doCombinations(lineLiterals, 3, cnf, SIGNED);    
+                    break;
+                case 5: // 2 true out of 5 lines
+                    doCombinations(lineLiterals, 4, cnf, UNSIGNED);    
+                    doCombinations(lineLiterals, 3, cnf, SIGNED);    
+                    break;
+                case 6: // 2 true out of 6 lines
+                    doCombinations(lineLiterals, 5, cnf, UNSIGNED);    
                     doCombinations(lineLiterals, 3, cnf, SIGNED);    
                     break;
                 } // switch linesConnected
@@ -248,6 +256,7 @@ void sat::generateCNF(ThePuzzle& p, u_int8_t width, u_int8_t height)
         nClauses += 2;
     }
 
+    // TODO: vertex tree in hex environment
     // gp through each vertex
     for (u_int16_t y = 0; y <= height; y++)
     {
